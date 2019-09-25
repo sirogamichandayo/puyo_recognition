@@ -1,0 +1,14 @@
+get_tumo: get_tumo_tokopuyo.o state_main.o
+	clang++  -o get_tumo get_tumo_tokopuyo.o state_main.o color.o
+
+color.o: ../src/recognition/color.cpp
+	clang++ -std=c++1z -c ../src/recognition/color.cpp
+
+state_main.o: ../src/recognition/state_main.cpp
+	clang++ -std=c++1z -c ../src/recognition/state_main.cpp `pkg-config --cflags opencv` `pkg-config --libs opencv` -lX11
+
+get_tumo_tokopuyo.o: get_tumo_tokopuyo.cpp
+	clang++ -std=c++1z -c get_tumo_tokopuyo.cpp `pkg-config --cflags opencv` `pkg-config --libs opencv` -lX11
+
+clean:
+	$(RM) *.o

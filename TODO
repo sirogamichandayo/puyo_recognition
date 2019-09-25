@@ -1,0 +1,24 @@
+recognition:
+  ☐ getState(none)
+  ☐ getState(int)
+  ☐ getState(vector<int>)
+
+  ☐ isExistNext(none);
+
+  ☐ getNext_1p(vector<int>)
+  ☐ getNext2_1p(vector<int>)
+  ☐ getBoard_1p(vector<int>)
+  ☐ getNext_2p(vector<int>)
+  ☐ getNext2_2p(vector<int>)
+  ☐ getBoard_2p(vector<int> &field)
+
+  ✔ GetResult() @done(19-09-10 19:41)
+  ✔ isJudgeFightEnd() @done(19-09-10 19:41)
+
+  "Use get for puyo's color"
+  ✔ toReadPuyoColor(HSV) @done(19-09-10 19:42)
+  "Use in judge whether fighting or not.
+  ✔ toReadBlueRed(HSV) @done(19-09-10 19:42)
+  "Use in 
+  ✔ toReadGreenYellow(HSV) @done(19-09-10 19:42)
+

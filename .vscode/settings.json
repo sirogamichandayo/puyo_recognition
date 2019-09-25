@@ -1,0 +1,15 @@
+{
+	"C_Cpp.errorSquiggles": "Disabled",
+	"C_Cpp.intelliSenseEngineFallback": "Enabled",
+	"editor.rulers": [
+		8,
+		16,
+		24,
+		32,
+		40,
+		48,
+		56,
+		64,
+		72
+	]
+}

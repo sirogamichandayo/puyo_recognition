@@ -1,0 +1,6 @@
+get_tumo_tokopuyo.o: get_tumo_tokopuyo.cpp
+	g++ -c get_tumo_tokopuyo.cpp `pkg-config --cflags opencv` `pkg-config --libs opencv`
+
+state_main.o: state_main.cpp
+	g++ -c state_main.cpp `pkg-config --cflags opencv` `pkg-config --libs opencv` -lX11
+
