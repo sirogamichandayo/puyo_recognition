@@ -643,10 +643,8 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image)
 	// for is_exist_next
 	// color_pixel_dict[color::NONE]*=2.9;
 
-	/* debug
 	saveColorAndImg(color_pixel_dict.begin(), color_pixel_dict.end(), image_padding);
 	showForDebug(image_padding);
-	*/
 	
 	std::pair<int, int> max_color = *std::max_element
 		(color_pixel_dict.begin(), color_pixel_dict.end(),

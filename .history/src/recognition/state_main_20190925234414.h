@@ -89,8 +89,7 @@ public:
 	/* ex : (Win, Lose, Drow)*/
 	void getState(const int &mode, int &issue);
 	// Mainly use to get field or next
-	void getState(const int &mode, std::vector<int>::iterator first, 
-																	std::vector<int>::iterator last);
+	void getState(const int &mode, std::array<int>::iterator first, std::array<int>::Iterator last);
 
 private:
 	std::map<unsigned int, cv::Rect> player_resize;
@@ -118,33 +117,15 @@ private:
 	      const float &y1_rate, const float &w_rate, const float &h_rate);
 
 	int colorNum2ForBitNum(int color);
-
 	int getColor(const cv::Mat &img);
-
-	// TODO: Put together
-	void getColorSet(const int &cols, const int &rows, const cv::Rect &rec, 
-									std::vector<int>::iterator first,
-									std::vector<int>::iterator last);
-/*									
-	void getNext_1p(std::vector<int>::iterator first, 
-									std::vector<int>::iterator last);
-	void getNext_2p(std::vector<int>::iterator first,
-									std::vector<int>::iterator last);
-	void getNext2_1p(std::vector<int>::iterator first,
-									std::vector<int>::iterator last);
-	void getNext2_2p(std::vector<int>::iterator first,
-									std::vector<int>::iterator last);
-	void getBoard_1p(std::vector<int>::iterator first,
-									std::vector<int>::iterator last);
-	void getBoard_2p(std::vector<int>::iterator first,
-								  std::vector<int>::iterator last);
-*/									
-
-	void splitImage(const cv::Mat *const image, 
-									const int &col_num, const int &row_num, 
-									std::vector<cv::Mat>::iterator first, 
-									std::vector<cv::Mat>::iterator end);
-
+	void getNext_1p(std::vector<int> *field);
+	void getNext_2p(std::vector<int> *field);
+	void getNext2_1p(std::vector<int> *filed);
+	void getNext2_2p(std::vector<int> *field);
+	void getBoard_1p(std::vector<int> *field);
+	void getBoard_2p(std::vector<int> *field);
+	void splitImage(const cv::Mat *const image, const int *const col_num,
+									const int *const row_num, std::vector<cv::Mat> *const image_vec);
 	bool isExistNext_1p();
 	bool isExistNext_2p();
 	/*
@@ -157,6 +138,7 @@ private:
 	// Judge get result of fight.
 	void getResult(int *const result);		
 	int toGetPuyoColorPerPiece(const cv::Mat &image);
+
 
 	// For debug
 	void showForDebug(const cv::Mat &image)
@@ -173,7 +155,7 @@ private:
 		cv::Mat img_hsv;
 		cv::cvtColor(img_, img_hsv, CV_HSV2BGR);
 
-		const std::string path = "/mnt/programming/data/MO/tokopuyo/recognition_data3/";
+		const std::string path = "/mnt/programming/data/MO/tokopuyo/recognition_data2/";
 		std::ofstream write_file;
 		if (count_call_is_next_1p == 0)
 			write_file.open(path+"color_elem.txt", std::ios::trunc);

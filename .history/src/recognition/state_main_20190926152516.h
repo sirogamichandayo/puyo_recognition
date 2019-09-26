@@ -122,10 +122,9 @@ private:
 	int getColor(const cv::Mat &img);
 
 	// TODO: Put together
-	void getColorSet(const int &cols, const int &rows, const cv::Rect &rec, 
+	void getColorSet(const int &&cols, const int &&rows, const cv::Rect &&rec, 
 									std::vector<int>::iterator first,
 									std::vector<int>::iterator last);
-/*									
 	void getNext_1p(std::vector<int>::iterator first, 
 									std::vector<int>::iterator last);
 	void getNext_2p(std::vector<int>::iterator first,
@@ -138,10 +137,9 @@ private:
 									std::vector<int>::iterator last);
 	void getBoard_2p(std::vector<int>::iterator first,
 								  std::vector<int>::iterator last);
-*/									
 
 	void splitImage(const cv::Mat *const image, 
-									const int &col_num, const int &row_num, 
+									const int &&col_num, const int &&row_num, 
 									std::vector<cv::Mat>::iterator first, 
 									std::vector<cv::Mat>::iterator end);
 
@@ -173,7 +171,7 @@ private:
 		cv::Mat img_hsv;
 		cv::cvtColor(img_, img_hsv, CV_HSV2BGR);
 
-		const std::string path = "/mnt/programming/data/MO/tokopuyo/recognition_data3/";
+		const std::string path = "/mnt/programming/data/MO/tokopuyo/recognition_data2/";
 		std::ofstream write_file;
 		if (count_call_is_next_1p == 0)
 			write_file.open(path+"color_elem.txt", std::ios::trunc);

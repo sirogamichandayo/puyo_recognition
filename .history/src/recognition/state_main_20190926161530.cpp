@@ -361,11 +361,9 @@ void State::getBoard_2p(std::vector<int>::iterator first,
 int State::getColor(const cv::Mat &img)
 {
 	int color = toGetPuyoColorPerPiece(img);
-	if (color == color::NONE || color == color::DIST)
-		return color;
-
 	auto it = std::find(puyo_color_list.begin(), puyo_color_list.end(), color);
-
+	std::cout << "debug : " << std::endl;
+	std::cout << it == puyo_color_list.end() << std::endl;
 	
 	if (!initColorList && it == puyo_color_list.end()) {
 		puyo_color_list.push_back(color);
@@ -378,6 +376,8 @@ int State::getColor(const cv::Mat &img)
 			if (it != puyo_color_list.end())
 				isExistRedInColorList = true;
 		}
+
+		
 	}
 	return colorNum2ForBitNum(color);
 }
@@ -643,10 +643,8 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image)
 	// for is_exist_next
 	// color_pixel_dict[color::NONE]*=2.9;
 
-	/* debug
 	saveColorAndImg(color_pixel_dict.begin(), color_pixel_dict.end(), image_padding);
 	showForDebug(image_padding);
-	*/
 	
 	std::pair<int, int> max_color = *std::max_element
 		(color_pixel_dict.begin(), color_pixel_dict.end(),

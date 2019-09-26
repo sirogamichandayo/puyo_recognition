@@ -62,19 +62,19 @@ void State::getState(const int &mode,
 
 		// TODO: Waste reduction.
 		auto it = first;
-		getColorSet(BOARD_COLS, BOARD_ROWS_NO_IN_1314,
+		getColorSet(game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
 								pic::board_1p,
-								it, std::next(it, BOARD_ROWS_NO_IN_1314*BOARD_COLS));
+								it, std::next(it, BOARD_ROWS_NO_IN_1314*BOARD_COLS-1));
 		std::advance(it, BOARD_ROWS_NO_IN_1314*BOARD_COLS);
 
-		getColorSet(NEXT1_COLS, NEXT1_ROWS,
+		getColorSet(game::NEXT1_COLS, game::NEXT1_ROWS,
 								pic::next_1p,
-								it, std::next(it, NEXT1_ROWS*NEXT1_COLS));
+								it, std::next(it, NEXT1_ROWS*NEXT1_COLS-1));
 		std::advance(it, NEXT1_ROWS*NEXT1_COLS);
 
-		getColorSet(NEXT2_COLS, NEXT2_ROWS,
+		getColorSet(game::NEXT2_COLS, game::NEXT2_ROWS,
 								pic::next2_1p,
-								it, std::next(it, NEXT2_ROWS*NEXT2_COLS));
+								it, std::next(it, NEXT2_ROWS*NEXT2_COLS-1));
 
 		// Those are code that to judge between "X" or not.
 		// "X" is top of the third row;
@@ -361,11 +361,7 @@ void State::getBoard_2p(std::vector<int>::iterator first,
 int State::getColor(const cv::Mat &img)
 {
 	int color = toGetPuyoColorPerPiece(img);
-	if (color == color::NONE || color == color::DIST)
-		return color;
-
 	auto it = std::find(puyo_color_list.begin(), puyo_color_list.end(), color);
-
 	
 	if (!initColorList && it == puyo_color_list.end()) {
 		puyo_color_list.push_back(color);
@@ -378,6 +374,8 @@ int State::getColor(const cv::Mat &img)
 			if (it != puyo_color_list.end())
 				isExistRedInColorList = true;
 		}
+
+		
 	}
 	return colorNum2ForBitNum(color);
 }
@@ -643,10 +641,8 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image)
 	// for is_exist_next
 	// color_pixel_dict[color::NONE]*=2.9;
 
-	/* debug
 	saveColorAndImg(color_pixel_dict.begin(), color_pixel_dict.end(), image_padding);
 	showForDebug(image_padding);
-	*/
 	
 	std::pair<int, int> max_color = *std::max_element
 		(color_pixel_dict.begin(), color_pixel_dict.end(),

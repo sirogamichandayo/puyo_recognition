@@ -43,97 +43,67 @@ void State::getState(const int &mode, int &issue)
 }
 
 void State::getState(const int &mode, 
-		std::vector<int>::iterator first, std::vector<int>::iterator end)
+				std::array<int>::iterator first, std::array<int>::iterator end)
 {
-	using namespace game;
 	// ぷよとかを受け取る。
 	if (mode == get_mode::allPuyo_1p)
 	{
-		int size = BOARD_ROWS_NO_IN_1314 * BOARD_COLS +
-							 NEXT1_ROWS * NEXT1_COLS +
-							 NEXT2_ROWS * NEXT2_COLS;
+		int size = game::BOARD_ROWS_NO_IN_1314 * game::BOARD_COLS +
+							 game::NEXT1_ROWS * game::NEXT1_COLS +
+							 game::NEXT2_ROWS * game::NEXT2_COLS;
 		if (size != std::distance(first, end))
 		{
-			LOG("Please pass Iterator of container of the corresponding size.\n\
-					std::vector<game::BOARD_ROWS_NO_IN_1314*game::BOARD_COLS>    \n\
-					is required.");
+			LOG("Please pass Iterator of container of the corresponding size.\n
+					 std::array<int, 12*6> is required.");
 			std::exit(1);
 		}
 
-		// TODO: Waste reduction.
-		auto it = first;
-		getColorSet(BOARD_COLS, BOARD_ROWS_NO_IN_1314,
-								pic::board_1p,
-								it, std::next(it, BOARD_ROWS_NO_IN_1314*BOARD_COLS));
-		std::advance(it, BOARD_ROWS_NO_IN_1314*BOARD_COLS);
+		initializeField(&size, &field);
 
-		getColorSet(NEXT1_COLS, NEXT1_ROWS,
-								pic::next_1p,
-								it, std::next(it, NEXT1_ROWS*NEXT1_COLS));
-		std::advance(it, NEXT1_ROWS*NEXT1_COLS);
-
-		getColorSet(NEXT2_COLS, NEXT2_ROWS,
-								pic::next2_1p,
-								it, std::next(it, NEXT2_ROWS*NEXT2_COLS));
+		std::vector<int> board(14*6);
+		std::vector<int> next1(2);
+		std::vector<int> next2(2);
+		getBoard_1p(&board);
+		getNext_1p(&next1);
+		getNext2_1p(&next2);
+		auto begin = field.begin();
+		
+		std::move(board.begin(), board.end(), begin);
+		std::move(next1.begin(), next1.end(), begin+=board.size());
+		std::move(next2.begin(), next2.end(), begin+=next1.size());
 
 		// Those are code that to judge between "X" or not.
 		// "X" is top of the third row;
 
 		// When puyo don't exist under space.
-		auto it_34 = next(first, 34);
-		auto it_35 = next(it_34);
-		if (*it_34 == color::NONE)
-			*it_35 = color::NONE;
+		if (field[34] == color::NONE)
+			field[35] = color::NONE;
 
 		// When don't exist color::RED in puyo_color_list.
-		if (!isExistRedInColorList && *it_35 == color::RED)
-			*it_35 = color::NONE;
+		if (!isExistRedInColorList && field[35] == color::RED)
+			field[35] = color::NONE;
 
 		return;
 	}
 
 	if (mode == get_mode::allPuyo_2p)
 	{
-		int size = BOARD_ROWS_NO_IN_1314 * BOARD_COLS +
-							 NEXT1_ROWS * NEXT1_COLS +
-							 NEXT2_ROWS * NEXT2_COLS;
-		if (size != std::distance(first, end))
-		{
-			LOG("Please pass Iterator of container of the corresponding size.\n\
-					std::vector<game::BOARD_ROWS_NO_IN_1314*game::BOARD_COLS>    \n\
-					is required.");
-			std::exit(1);
-		}
+		int size = 14 * 6 + 2;
+		initializeField(&size, &field);
+		
+		std::vector<int> board(14*6);
+		std::vector<int> next1(2);
+		std::vector<int> next2(2);
+		getBoard_2p(&board);
+		getNext_2p(&next1);
+		getNext2_2p(&next2);
+		auto begin = field.begin();
 
-		auto it = first;
-		getColorSet(game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-								pic::board_2p,
-								it, std::next(it, BOARD_ROWS_NO_IN_1314*BOARD_COLS-1));
-		std::advance(it, BOARD_ROWS_NO_IN_1314*BOARD_COLS);
+		std::move(board.begin(), board.end(), begin);
+		std::move(next1.begin(), next1.end(), begin+=board.size());
+		std::move(next2.begin(), next2.end(), begin+=next1.size());
 
-		getColorSet(game::NEXT1_COLS, game::NEXT1_ROWS,
-								pic::next_2p,
-								it, std::next(it, NEXT1_ROWS*NEXT1_COLS-1));
-		std::advance(it, NEXT1_ROWS*NEXT1_COLS);
-
-		getColorSet(game::NEXT2_COLS, game::NEXT2_ROWS,
-								pic::next2_2p,
-								it, std::next(it, NEXT2_ROWS*NEXT2_COLS-1));
-
-		// Those are code that to judge between "X" or not.
-		// "X" is top of the third row;
-
-		// When puyo don't exist under space.
-		auto it_34 = next(first, 34);
-		auto it_35 = next(it_34);
-		if (*it_34 == color::NONE)
-			*it_35 = color::NONE;
-
-		// When don't exist color::RED in puyo_color_list.
-		if (!isExistRedInColorList && *it_35 == color::RED)
-			*it_35 = color::NONE;
-
-		return;	
+		return;
 	}
 
 	////////////////////////////////////////
@@ -209,35 +179,13 @@ int State::colorNum2ForBitNum(int color)
 	return color::MISS;
 }
 
-void State::getColorSet(const int &cols, const int &rows, 
-												const cv::Rect &rec,
-												std::vector<int>::iterator first,
-												std::vector<int>::iterator last)
-{
-	int size = cols * rows;
-	if (size != std::distance(first, last))
-	{
-		LOG("The distance of iterator is strange");
-		std::exit(1);
-	}
-		
-	cv::Mat img_(this->img, rec);
-	std::vector<cv::Mat> img_vec(size);
-	splitImage(&img_, cols, rows, 
-						img_vec.begin(), img_vec.end());
-	
-	for (int i = 0; i < size; ++i, ++first)
-		*first = getColor(img_vec[i]);
-}
-
-/*
 void State::getNext_1p(std::vector<int>::iterator first,
 											 std::vector<int>::iterator last)
 {
 	using cols = game::NEXT1_COLS;
 	using rows = game::NEXT1_ROWS;
 	int size = cols * rows;
-	if (size != std::distance(first, last))
+	if (cols * rows != std::distance(first, end))
 	{
 		LOG("The distance of iterator is strange.");
 		std::exit(1);
@@ -245,127 +193,98 @@ void State::getNext_1p(std::vector<int>::iterator first,
 
 	cv::Mat img_next_1p(this->img, pic::next2_2p);
 	std::vector<cv::Mat> img_next_1p_vec(size);
-	splitImage(&img_next_1p, cols, rows, 
+	splitImage(&img_next_1p, &col_num, &row_num, 
 	           img_next_1p_vec.begin(), img_next_1p_vec.end());
 
-	for (int i = 0; i < size; ++i, ++first)
-		*first = getColor(img_next_2p_vec[i]);
+	auto it = first;
+	for (int i = 0; i < size; ++i, ++it)
+		*it = getColor(img_next_2p_vec[i]);
 }
 
-void State::getNext2_1p(std::vector<int>::iterator first, 
-											  std::vector<int>::iterator last)
+void State::getNext2_1p(std::vector<int> *field)
 {
-	using cols = game::NEXT2_COLS;
-	using rows = game::NEXT2_ROWS;
-	int size = cols * rows;
-	if (size != std::distance(first, last))
-	{
-		LOG("The distance of iterator is strange.");
-		std::exit(1);
-	}
+	int col_num = 1;
+	int row_num = 2;
+	if (!field->size())
+		field->resize(col_num * row_num);
 
+	// cut image
 	cv::Mat img_next_2p(this->img, pic::next2_2p);
-	std::vector<cv::Mat> img_next_2p_vec(size);
-	splitImage(&img_next_2p, cols, rows,
-						 img_next_2p_vec.begin(), img_next_2p_vec.end());
-	
-	for (int i = 0; i < size; ++i, ++first)
-		*first = getColor(img_next_2p_vec[i]);
+	std::vector<cv::Mat> img_next_2p_vec;
+	splitImage(&img_next_2p, &col_num, &row_num, &img_next_2p_vec);
+	// TODO
+	int size = img_next_2p_vec.size();
+	for (int i = 0; i < size; ++i)
+		(*field)[i] = getColor(img_next_2p_vec[i]);
 }
 
-void State::getBoard_1p(std::vector<int>::iterator first,
-												std::vector<int>::iterator last)
+void State::getBoard_1p(std::vector<int> *field)
 {
-	using cols = game::BOARD_COLS;
-	using rows = game::BOARD_ROWS_NO_IN_1314;
-	int size = cols * rows;
-	if (size != std::distance(first, last))
-	{
-		LOG("The distance of iterator is strange.");
-		std::exit(1);
-	}
+	int col_num = game::BOARD_COLS;
+	int row_num = game::BOARD_ROWS_NO_IN_1314;
+	if (!field->size())
+		field->resize(col_num * row_num);
 
 	cv::Mat img_board_1p(this->img, pic::board_1p);
-	std::vector<cv::Mat> img_board_1p_vec(size);
-	splitImage(&img_board_1p, cols, rows,
-						img_board_1p_vec.begin(), img_board_1p_vec.end());
-
-	for (int i = 0; i < size; ++i, ++first)
-		*first = getColor(img_board_1p_vec[i]);
+	std::vector<cv::Mat> img_board_1p_vec;
+	splitImage(&img_board_1p, &col_num, &row_num, &img_board_1p_vec);
+	// TODO
+	int size = img_board_1p_vec.size();
+	for (int i = 0; i < size; ++i)
+		(*field)[i] = getColor(img_board_1p_vec[i]);
 }
 
-void State::getNext_2p(std::vector<int>::iterator first,
-											std::vector<int>::iterator last)
+void State::getNext_2p(std::vector<int> *field)
 {
-	using cols = game::NEXT2_COLS;
-	using rows = game::NEXT2_ROWS;
-	int size = cols * rows;
-	if (size != std::distance(first, last))
-	{
-		LOG("The distance of iterator is strange.");
-		std::exit(1);
-	}
+	int col_num = 1;
+	int row_num = 2;
+	if (!field->size())
+		field->resize(col_num * row_num);
 
 	cv::Mat img_next_2p(this->img, pic::next_2p);
-	std::vector<cv::Mat> img_next_2p_vec(size);
-	splitImage(&img_next_2p, cols, rows, 
-						img_next_2p_vec.begin(), img_next_2p_vec.end());
-
-	for (int i = 0; i < size; ++i, ++first)
-		*first = getColor(img_next_2p_vec[i]);
+	std::vector<cv::Mat> img_next_2p_vec;
+	splitImage(&img_next_2p, &col_num, &row_num, &img_next_2p_vec);
+	// TODO
+	int size = img_next_2p_vec.size();
+	for (int i = 0; i < size; ++i)
+		(*field)[i] = getColor(img_next_2p_vec[i]);
 }
 
-void State::getNext2_2p(std::vector<int>::iterator first,
-												std::vector<int>::iterator last)
+void State::getNext2_2p(std::vector<int> *field)
 {
-	using cols = game::NEXT2_COLS;
-	using rows = game::NEXT2_ROWS;
-	int size = cols * rows;
-	if (size != std::distance(first, last))
-	{
-		LOG("The distance of iterator is strange.");
-		std::exit(1);
-	}
+	int col_num = 1;
+	int row_num = 2;
+	if (!field->size())
+		field->resize(col_num * row_num);
 
 	cv::Mat img_next2_2p(this->img, pic::next2_2p);
-	std::vector<cv::Mat> img_next2_2p_vec(size);
-	splitImage(&img_next2_2p, cols, rows, 
-						img_next2_2p_vec.begin(), img_next2_2p_vec.end());
-
-	for (int i = 0; i < size; ++i, ++first)
-		*first = getColor(img_next2_2p_vec[i]);
+	std::vector<cv::Mat> img_next2_2p_vec;
+	splitImage(&img_next2_2p, &col_num, &row_num, &img_next2_2p_vec);
+	// TODO
+	int size = img_next2_2p_vec.size();
+	for (int i = 0; i < size; ++i)
+		(*field)[i] = getColor(img_next2_2p_vec[i]);
 }
 
-void State::getBoard_2p(std::vector<int>::iterator first,
-												std::vector<int>::iterator last)
+void State::getBoard_2p(std::vector<int> *field)
 {
-	using cols = game::BOARD_COLS;
-	using rows = game::BOARD_ROWS_NO_IN_1314;
-	int size = cols * rows;
-	if (size != std::distance(first, last))
-	{
-		LOG("The distance of iterator is strange.");
-		std::exit(1);
-	}	
+	int col_num = 6;
+	int row_num = 14;
+	if (!field->size())
+		field->resize(col_num * row_num);
 
 	cv::Mat img_board_2p(this->img, pic::next2_2p);
-	std::vector<cv::Mat> img_board_2p_vec(size);
-	splitImage(&img_board_2p, cols, rows, 
-						img_board_2p_vec.begin(), img_board_2p_vec.end());
-
-	for (int i = 0; i < size; ++i, ++first)
-		*first = getColor(img_board_2p_vec[i]);
+	std::vector<cv::Mat> img_board_2p_vec;
+	splitImage(&img_board_2p, &col_num, &row_num, &img_board_2p_vec);
+	int size = img_board_2p_vec.size();
+	for (int i = 0; i < size; ++i)
+		(*field)[i] = getColor(img_board_2p_vec[i]);
 }
-*/
 
 int State::getColor(const cv::Mat &img)
 {
 	int color = toGetPuyoColorPerPiece(img);
-	if (color == color::NONE || color == color::DIST)
-		return color;
-
 	auto it = std::find(puyo_color_list.begin(), puyo_color_list.end(), color);
-
 	
 	if (!initColorList && it == puyo_color_list.end()) {
 		puyo_color_list.push_back(color);
@@ -378,6 +297,8 @@ int State::getColor(const cv::Mat &img)
 			if (it != puyo_color_list.end())
 				isExistRedInColorList = true;
 		}
+
+		
 	}
 	return colorNum2ForBitNum(color);
 }
@@ -395,25 +316,16 @@ bool State::isExistNext_2p()
 	return (color::NONE != toGetPuyoColorPerPiece(is_next_img_2p));
 }
 
-void State::splitImage(const cv::Mat *const image, 
-											const int &col_num, const int &row_num, 
-											std::vector<cv::Mat>::iterator first, 
-											std::vector<cv::Mat>::iterator last)
+void State::splitImage(const cv::Mat *const image, const int *const col_num, const int *const row_num, std::vector<cv::Mat> *const image_vec)
 {
-	int size = col_num * row_num;
-	if (size != std::distance(first, last))
-	{
-		LOG("The distance of iterator is strange.");
-		std::exit(1);
-	}
 
 	int cols = image->cols;
 	int rows = image->rows;
 
-	int splitCols = cols / col_num;
-	int splitRows = rows / row_num;
+	int splitCols = cols / *col_num;
+	int splitRows = rows / *row_num;
 
-	std::vector<cv::Rect> p(col_num * row_num);
+	std::vector<cv::Rect> p(*col_num * *row_num);
 
 	/* Order of cutting.
 	+=========+
@@ -423,22 +335,28 @@ void State::splitImage(const cv::Mat *const image,
 	|1|5|9 |13|
 	+=========+
 	*/
-	for (int c = 0; c < col_num; ++c)
+	for (int c = 0; c < *col_num; ++c)
 	{
 		int cols_ = c * splitCols;
-		int index_cols = c * row_num;
-		for (int r = 0; r < row_num; ++r)
+		int index_cols = c * *row_num;
+		for (int r = 0; r < *row_num; ++r)
 		{
-			int rows_ = (row_num - (r + 1)) * splitRows;
+			int rows_ = (*row_num - (r + 1)) * splitRows;
 			cv::Rect rec = cv::Rect(cols_, rows_, splitCols, splitRows);
 			p[index_cols + r] = rec;
 		}
 	}
 
-	for (int i = 0; i < size; ++i, ++first)
+	// initialize.
+	int size = *col_num * *row_num;
+	initializeField(&size, image_vec);
+
+	int index = 0;
+	for (const auto &rec_ : p)
 	{
-		cv::Mat cropped(*image, p[i]);
-		*first = cropped;
+		cv::Mat cropped(*image, rec_);
+		(*image_vec)[index] = cropped;
+		++index;
 	}
 }
 
