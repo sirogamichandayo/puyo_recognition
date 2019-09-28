@@ -97,7 +97,8 @@ private:
 	cv::Mat img;
 	std::vector<int> puyo_color_list;
 	bool initColorList;
-	bool isExistRedInColorList;
+	bool isExistRedInColorList; // for "X"
+	bool isExistYellowInColorList; // for zenkesi.
 
 	// debug
 	int count_call_is_next_1p=0;
@@ -118,14 +119,11 @@ private:
 
 	int colorNum2ForBitNum(int color);
 	int getColor(const cv::Mat &img);
-	void getNext_1p(std::vector<int> *field);
-	void getNext_2p(std::vector<int> *field);
-	void getNext2_1p(std::vector<int> *filed);
-	void getNext2_2p(std::vector<int> *field);
-	void getBoard_1p(std::vector<int> *field);
-	void getBoard_2p(std::vector<int> *field);
-	void splitImage(const cv::Mat *const image, const int *const col_num,
-									const int *const row_num, std::vector<cv::Mat> *const image_vec);
+
+	void getPuyoColorSet(std::vector<int> *field, const int& col_num, const int& row_num, 
+									const cv::Rect &target_rect);
+	void splitImage(const cv::Mat &image, const int &col_num,
+									const int &row_num, std::vector<cv::Mat> *const image_vec);
 	bool isExistNext_1p();
 	bool isExistNext_2p();
 	/*
@@ -137,7 +135,7 @@ private:
 	bool isJudgeFightEnd();
 	// Judge get result of fight.
 	void getResult(int *const result);		
-	int toGetPuyoColorPerPiece(const cv::Mat &image);
+	int toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next=false);
 
 	// For debug
 	void showForDebug(const cv::Mat &image)
