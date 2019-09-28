@@ -229,7 +229,7 @@ int State::colorNum2ForBitNum(int color)
 	return color::MISS;
 }
 
-void State::ColorSet(std::vector<int> *const field, 
+void State::getPuyoColorSet(std::vector<int> *const field, 
 												const int& cols, const int& rows,
 												const cv::Rect &target_rect)
 {
@@ -249,101 +249,6 @@ void State::ColorSet(std::vector<int> *const field,
 }												
 
 
-void State::getNext_1p(std::vector<int> *field)
-{
-	int col_num = 1;
-	int row_num = 2;
-	if (!field->size())
-		field->resize(col_num * row_num);
-
-	cv::Mat img_next_1p(this->img, pic::next2_2p);
-	std::vector<cv::Mat> img_next_1p_vec;
-	splitImage(&img_next_1p, &col_num, &row_num, &img_next_1p_vec);
-	// TODO
-	int size = img_next_1p_vec.size();
-	for (int i = 0; i < size; ++i)
-		(*field)[i] = getColor(img_next_1p_vec[i]);
-}
-
-void State::getNext2_1p(std::vector<int> *field)
-{
-	int col_num = 1;
-	int row_num = 2;
-	if (!field->size())
-		field->resize(col_num * row_num);
-
-	// cut image
-	cv::Mat img_next_2p(this->img, pic::next2_2p);
-	std::vector<cv::Mat> img_next_2p_vec;
-	splitImage(&img_next_2p, &col_num, &row_num, &img_next_2p_vec);
-	// TODO
-	int size = img_next_2p_vec.size();
-	for (int i = 0; i < size; ++i)
-		(*field)[i] = getColor(img_next_2p_vec[i]);
-}
-
-void State::getBoard_1p(std::vector<int> *field)
-{
-	int col_num = game::BOARD_COLS;
-	int row_num = game::BOARD_ROWS_NO_IN_1314;
-	if (!field->size())
-		field->resize(col_num * row_num);
-
-	cv::Mat img_board_1p(this->img, pic::board_1p);
-	std::vector<cv::Mat> img_board_1p_vec;
-	splitImage(&img_board_1p, &col_num, &row_num, &img_board_1p_vec);
-	// TODO
-	int size = img_board_1p_vec.size();
-	for (int i = 0; i < size; ++i)
-		(*field)[i] = getColor(img_board_1p_vec[i]);
-}
-
-void State::getNext_2p(std::vector<int> *field)
-{
-	int col_num = 1;
-	int row_num = 2;
-	if (!field->size())
-		field->resize(col_num * row_num);
-
-	cv::Mat img_next_2p(this->img, pic::next_2p);
-	std::vector<cv::Mat> img_next_2p_vec;
-	splitImage(&img_next_2p, &col_num, &row_num, &img_next_2p_vec);
-	// TODO
-	int size = img_next_2p_vec.size();
-	for (int i = 0; i < size; ++i)
-		(*field)[i] = getColor(img_next_2p_vec[i]);
-}
-
-void State::getNext2_2p(std::vector<int> *field)
-{
-	int col_num = 1;
-	int row_num = 2;
-	if (!field->size())
-		field->resize(col_num * row_num);
-
-	cv::Mat img_next2_2p(this->img, pic::next2_2p);
-	std::vector<cv::Mat> img_next2_2p_vec;
-	splitImage(&img_next2_2p, &col_num, &row_num, &img_next2_2p_vec);
-	// TODO
-	int size = img_next2_2p_vec.size();
-	for (int i = 0; i < size; ++i)
-		(*field)[i] = getColor(img_next2_2p_vec[i]);
-}
-
-void State::getBoard_2p(std::vector<int> *field)
-{
-	int col_num = 6;
-	int row_num = 14;
-	if (!field->size())
-		field->resize(col_num * row_num);
-
-	cv::Mat img_board_2p(this->img, pic::next2_2p);
-	std::vector<cv::Mat> img_board_2p_vec;
-	splitImage(&img_board_2p, &col_num, &row_num, &img_board_2p_vec);
-	int size = img_board_2p_vec.size();
-	for (int i = 0; i < size; ++i)
-		(*field)[i] = getColor(img_board_2p_vec[i]);
-}
 
 int State::getColor(const cv::Mat &img)
 {
