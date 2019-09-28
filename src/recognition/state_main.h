@@ -124,13 +124,14 @@ private:
 									const cv::Rect &target_rect);
 	void splitImage(const cv::Mat &image, const int &col_num,
 									const int &row_num, std::vector<cv::Mat> *const image_vec);
-	bool isExistNext_1p();
-	bool isExistNext_2p();
 	/*
 	I'm not goint to implement it for amination.
-	void getMyNoticeOjama(std::vector<int> &field);
-	void getMyNoticeOjama(std::vector<int> &filed);
+	void getMyOjamaCount_1p(std::vector<int> &field);
+	void getMyOjamaCount_2p(std::vector<int> &filed);
 	*/
+
+	bool isExistNext_1p();
+	bool isExistNext_2p();
 	// Judge between enf of fight or not.
 	bool isJudgeFightEnd();
 	// Judge get result of fight.
