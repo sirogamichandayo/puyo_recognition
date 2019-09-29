@@ -31,7 +31,8 @@ int main()
 			std::ostringstream ss;
 			ss << std::setw(3) << std::setfill('0') << index++ << " : " << elem;
 			std::cout << ss.str() << std::endl;
+			if (index % 12 == 0)
+				std::cout << std::endl;
 		}
-			
 	}
 }

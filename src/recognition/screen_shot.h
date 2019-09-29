@@ -29,10 +29,11 @@ const cv::Rect fight_2p = cv::Rect(1190, 950, 100, 52);
 const cv::Rect finish = cv::Rect(475, 420, 950, 220); // is finish of fight.
 const cv::Rect board_1p = cv::Rect(280, 160, 384, 720);
 const cv::Rect board_2p = cv::Rect(1256, 160, 384, 720);
-const cv::Rect next_1p = cv::Rect(720, 160, pic::PUYO_WIDTH, pic::PUYO_HEIGHT * 2);
-const cv::Rect next_2p = cv::Rect(1135, 160, pic::PUYO_WIDTH, pic::PUYO_HEIGHT * 2);
-const cv::Rect next2_1p = cv::Rect(771, 295, pic::SMALL_PUYO_WIDTH, pic::SMALL_PUYO_HEIGHT * 2);
-const cv::Rect next2_2p = cv::Rect(1098, 295, pic::SMALL_PUYO_WIDTH, pic::SMALL_PUYO_HEIGHT * 2);
+const cv::Rect next_1p = cv::Rect(720, 165, pic::PUYO_WIDTH, pic::PUYO_HEIGHT * 2);
+const cv::Rect next_2p = cv::Rect(1135, 165, pic::PUYO_WIDTH, pic::PUYO_HEIGHT * 2);
+// const cv::Rect next2_1p = cv::Rect(771, 295, pic::SMALL_PUYO_WIDTH, pic::SMALL_PUYO_HEIGHT * 2);
+const cv::Rect next2_1p = cv::Rect(765, 297, pic::SMALL_PUYO_WIDTH, pic::SMALL_PUYO_HEIGHT * 2);
+const cv::Rect next2_2p = cv::Rect(1098, 297, pic::SMALL_PUYO_WIDTH, pic::SMALL_PUYO_HEIGHT * 2);
 const cv::Rect is_next_1p = cv::Rect(720, 160, pic::PUYO_WIDTH, pic::PUYO_HEIGHT);
 const cv::Rect is_next_2p = cv::Rect(1135, 160, pic::PUYO_WIDTH, pic::PUYO_HEIGHT);
 

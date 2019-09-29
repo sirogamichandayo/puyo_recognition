@@ -66,9 +66,9 @@ void State::getState(const int &mode, std::vector<int> &field)
 								game::NEXT2_COLS * game::NEXT2_ROWS;
 		initializeField(&size, &field);
 
-		std::vector<int> board(14*6);
-		std::vector<int> next1(2);
-		std::vector<int> next2(2);
+		std::vector<int> board(game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314);
+		std::vector<int> next1(game::NEXT1_COLS*game::NEXT1_ROWS);
+		std::vector<int> next2(game::NEXT2_COLS*game::NEXT2_ROWS);
 
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
 										pic::board_1p);
@@ -100,16 +100,6 @@ void State::getState(const int &mode, std::vector<int> &field)
 
 		// Those code that to judge between senkesi or not.
 
-		std::vector<int> all_delete_influence = {8, 9, 10,
-																						20, 21, 22,
-																						32, 33, 34,
-																						44, 45, 46,
-																						56, 57, 58};
-		for (const auto &index : all_delete_influence)																					
-		{
-			if (field[index] == color::YELLOW && !isExistYellowInColorList)
-				field[index] = color::NONE;
-		}
 				
 		return;
 	}
@@ -121,9 +111,9 @@ void State::getState(const int &mode, std::vector<int> &field)
 								game::NEXT2_COLS * game::NEXT2_ROWS;
 		initializeField(&size, &field);
 		
-		std::vector<int> board(14*6);
-		std::vector<int> next1(2);
-		std::vector<int> next2(2);
+		std::vector<int> board(game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314);
+		std::vector<int> next1(game::NEXT1_COLS*game::NEXT2_ROWS);
+		std::vector<int> next2(game::NEXT2_COLS*game::NEXT2_ROWS);
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
 										pic::board_2p);
 		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
@@ -136,25 +126,6 @@ void State::getState(const int &mode, std::vector<int> &field)
 		std::move(next1.begin(), next1.end(), begin+=board.size());
 		std::move(next2.begin(), next2.end(), begin+=next1.size());
 
-		// I don't think about floating puyo.
-		for (int i = 0; i < 14*6-1; ++i)
-		{
-			if (i % 12 == 0) continue;
-				
-			if (field[i] == color::NONE && field[i+1] != color::NONE)
-				field[i+1] = color::NONE;
-		}
-
-		// This code that to judge between "X" or not.
-		// "X" is top of the third row;
-
-		// When don't exist color::RED in puyo_color_list.
-		if (field[35] == color::RED && !isExistRedInColorList)
-			field[35] = color::NONE;
-
-
-		return;
-	}
 
 	////////////////////////////////////////
 	LOG("No exist mode.");
@@ -246,6 +217,62 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 
 	for (int i = 0; i < size; ++i)
 		(*field)[i] = getColor(img_split_vec[i]);
+
+	if (size != game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314)
+		return;
+
+	// Recognition adjustment of board.
+
+	// don't think about floating the color other than color::NONE.
+	for (int i = 0; i < 14*6-1; ++i)
+	{
+		if (i % 12 == 0) continue;
+			
+		if ((*field)[i] == color::NONE && (*field)[i+1] != color::NONE)
+			(*field)[i+1] = color::NONE;
+	}
+
+	// This code that to judge between "X" or not.
+	// "X" is top of the third row;
+
+
+	if ((*field)[35] == color::RED)
+	{
+		if (!isExistRedInColorList)
+		{
+			(*field)[35] = color::NONE;
+		}
+		else
+		{
+			// TODO: machine learning;
+			// use model, and img_split_img[35]
+		}
+		
+	}
+
+	// this code that to judge between "all delete" or not,
+	std::vector<int> all_delete_influence = {8, 9, 10,
+																					20, 21, 22,
+																					32, 33, 34,
+																					44, 45, 46,
+																					56, 57, 58};
+	for (const auto &index : all_delete_influence)																					
+	{
+		if ((*field)[index] == color::YELLOW)
+		{
+			if (!isExistYellowInColorList)
+			{
+				(*field)[index] = color::NONE;
+			}
+			else
+			{
+				// TODO: patten match in onencv;
+				// use "matten_match" and img_split_img[index]
+			}
+		}
+	}
+
+	
 }												
 
 
@@ -253,8 +280,11 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 int State::getColor(const cv::Mat &img)
 {
 	int color = toGetPuyoColorPerPiece(img);
+
+	// throw
 	if (color == color::NONE || color == color::DIST)
 		return color;
+	
 	auto it = std::find(puyo_color_list.begin(), puyo_color_list.end(), color);
 	
 	if (!initColorList && it == puyo_color_list.end()) {
@@ -263,11 +293,11 @@ int State::getColor(const cv::Mat &img)
 		if (puyo_color_list.size() == color::PUYO_COLOR_NUM)
 		{
 			initColorList = true;
-			auto it = std::find(puyo_color_list.begin(), puyo_color_list.end(), color::RED);
-			if (it != puyo_color_list.end())
+			auto it_red = std::find(puyo_color_list.begin(), puyo_color_list.end(), color::RED);
+			if (it_red != puyo_color_list.end())
 				isExistRedInColorList = true;
-			auto it = std::find(puyo_color_list.begin(), puyo_color_list.end(), color::YELLOW);
-			if (it != puyo_color_list.end())
+			auto it_yellow = std::find(puyo_color_list.begin(), puyo_color_list.end(), color::YELLOW);
+			if (it_yellow != puyo_color_list.end())
 				isExistYellowInColorList = true;
 		}
 	}
@@ -277,7 +307,6 @@ int State::getColor(const cv::Mat &img)
 bool State::isExistNext_1p()
 {
 	cv::Mat is_next_img_1p(this->img, pic::is_next_1p);
-
 	return (color::NONE != toGetPuyoColorPerPiece(is_next_img_1p, true));
 }
 
@@ -295,8 +324,8 @@ void State::splitImage(const cv::Mat &image,
 	int cols = image.cols;
 	int rows = image.rows;
 
-	int splitCols = cols / col_num;
-	int splitRows = rows / row_num;
+	int split_cols = cols / col_num;
+	int split_rows = rows / row_num;
 
 	std::vector<cv::Rect> crop_vec(size);
 
@@ -310,12 +339,12 @@ void State::splitImage(const cv::Mat &image,
 	*/
 	for (int c = 0; c < col_num; ++c)
 	{
-		int cols_ = c * splitCols;
+		int cols_ = c * split_cols;
 		int index_cols = c * row_num;
 		for (int r = 0; r < row_num; ++r)
 		{
-			int rows_ = (row_num - (r + 1)) * splitRows;
-			cv::Rect rec = cv::Rect(cols_, rows_, splitCols, splitRows);
+			int rows_ = (row_num - (r + 1)) * split_rows;
+			cv::Rect rec = cv::Rect(cols_, rows_, split_cols, split_rows);
 			crop_vec[index_cols + r] = rec;
 		}
 	}
@@ -326,7 +355,7 @@ void State::splitImage(const cv::Mat &image,
 	for (int i = 0; i < size; ++i)
 	{
 		cv::Mat cropped(image, crop_vec[i]);
-		image_vec[i] = cropped;
+		(*image_vec)[i] = cropped;
 	}
 }
 
@@ -491,7 +520,7 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 	cv::Mat image_padding;
 	// for exist next
 	if (is_exist_next)
-		paddingImg(image, image_padding, 0.1, 0.35, 0.85, 0.65);
+		paddingImg(image, image_padding, 0.1, 0.35, 0.8, 0.65);
 	else
 		paddingImg(image, image_padding, 0.1, 0.1, 0.8, 0.8);
 	
