@@ -58,7 +58,6 @@ void State::getState(const int &mode, int &issue)
 
 void State::getState(const int &mode, std::vector<int> &field)
 {
-	// ぷよとかを受け取る。
 	if (mode == get_mode::allPuyo_1p)
 	{
 		int size =  game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314 +
@@ -75,36 +74,16 @@ void State::getState(const int &mode, std::vector<int> &field)
 		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
 										pic::next_1p);
 		getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
-									  pic::next2_1p);
+										pic::next2_1p);
 				
 		auto begin = field.begin();
 		std::move(board.begin(), board.end(), begin);
 		std::move(next1.begin(), next1.end(), begin+=board.size());
 		std::move(next2.begin(), next2.end(), begin+=next1.size());
 
-		// I don't think about floating puyo.
-		for (int i = 1; i < 14*6; ++i)
-		{
-			if (i % 12 == 0) continue;
-				
-			if (field[i-1] == color::NONE && field[i] != color::NONE)
-				field[i] = color::NONE;
-		}
-
-		// This code that to judge between "X" or not.
-		// "X" is top of the third row;
-
-		// When don't exist color::RED in puyo_color_list.
-		if (field[35] == color::RED && !isExistRedInColorList)
-			field[35] = color::NONE;
-
-		// Those code that to judge between senkesi or not.
-
-				
 		return;
 	}
-
-	if (mode == get_mode::allPuyo_2p)
+	else if (mode == get_mode::allPuyo_2p)
 	{
 	  int size =  game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314 +
 								game::NEXT1_COLS * game::NEXT1_ROWS +
@@ -126,10 +105,14 @@ void State::getState(const int &mode, std::vector<int> &field)
 		std::move(next1.begin(), next1.end(), begin+=board.size());
 		std::move(next2.begin(), next2.end(), begin+=next1.size());
 
-
+		return;
+	}
+	 else 
+	{
 	////////////////////////////////////////
 	LOG("No exist mode.");
 	std::exit(0);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -177,6 +160,26 @@ void State::paddingImg(const cv::Mat &img_, cv::Mat &img_pad,
 	img_pad = img_(rect);
 }
 
+void State::img2Hist(const cv::Mat &img_, cv::MatND *const hist_)
+{
+	cv::resize(img_, img_, cv::Size(), 0.5, 0.5);
+	
+	int h_bins = 50, int s_bins = 60;
+	int histSize[] = {h_bins, s_bins};
+
+	float h_ranges[] = {0, 180};
+	float s_ranges[] = {0, 256};
+
+	const float* ranges[] = {h_ranges, s_ranges};
+
+	// We use HSV images, In this case H, S are used.
+	int channels[] = {0, 1};
+
+	cv::calcHist(&img_, 1, channels, cv::Mat(), hist_, 2, 
+								histSize, range, true, false);
+	cv::normalize(hist_, hist_, 0, 1, NORM_MINMAX, -1, cv::Mat());
+}
+
 int State::colorNum2ForBitNum(int color)
 {
 	/*
@@ -186,17 +189,34 @@ int State::colorNum2ForBitNum(int color)
 	if (color == color::NONE || color == color::DIST)
 		return color;
 	else if (color == puyo_color_list[0])
-		return 4;
+		return 0b100;
 	else if (color == puyo_color_list[1])
-		return 5;
+		return 0b101;
 	else if (color == puyo_color_list[2])
-		return 6;
+		return 0b110;
 	else if (color == puyo_color_list[3])
-		return 7;
+		return 0b111;
 
 	//  Logger
 	// Recognition miss.
 	LOG("Recognition miss");
+	return color::MISS;
+}
+
+int State::bitNum2ColorNum(int color)
+{
+	if (color == color::NONE || color == color::DIST)
+		return color;
+	else if (color == 0b100)
+		return puyo_color_list[0];
+	else if (color == 0b101)
+		return puyo_color_list[1];
+	else if (color == 0b110)
+		return puyo_color_list[2];
+	else if (color == 0b111)
+		return puyo_color_list[3];
+	
+	LOG("Change miss bit number to color number.");
 	return color::MISS;
 }
 
@@ -224,41 +244,44 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 	// Recognition adjustment of board.
 
 	// don't think about floating the color other than color::NONE.
-	for (int i = 0; i < 14*6-1; ++i)
+	for (int i = 1; i < game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314; ++i)
 	{
 		if (i % 12 == 0) continue;
 			
-		if ((*field)[i] == color::NONE && (*field)[i+1] != color::NONE)
-			(*field)[i+1] = color::NONE;
+		if ((*field)[i-1] == color::NONE && (*field)[i] != color::NONE)
+			(*field)[i] = color::NONE;
 	}
 
 	// This code that to judge between "X" or not.
 	// "X" is top of the third row;
-
-
-	if ((*field)[35] == color::RED)
+	if ((*field)[InfluenceHistX.first] == colorNum2ForBitNum(color::RED))
 	{
 		if (!isExistRedInColorList)
 		{
-			(*field)[35] = color::NONE;
+			(*field)[InfluenceHistX.first] = color::NONE;
 		}
 		else
 		{
-			// TODO: machine learning;
-			// use model, and img_split_img[35]
+			cv::MatND hist_X;
+			img2Hist(img_split_vec[InfluenceHistX.first], &hist_X);
+			double similar = cv::compareHist(hist_X, InfluenceHistX.second, 0);
+			if (similar > 0);
+			{
+				// debug code
+				(*field)[InfluenceHistX.first] = similar;
+				// (*field)[InfluenceHistX.first] = color::NONE;
+			}
+			else if (true /*machne learning*/)
+			{
+				// machne learning?.
+			} 
 		}
-		
 	}
 
 	// this code that to judge between "all delete" or not,
-	std::vector<int> all_delete_influence = {8, 9, 10,
-																					20, 21, 22,
-																					32, 33, 34,
-																					44, 45, 46,
-																					56, 57, 58};
-	for (const auto &index : all_delete_influence)																					
+	for (const auto &[index_AD, hist_]: InfluenceHistAllDelete)		
 	{
-		if ((*field)[index] == color::YELLOW)
+		if ((*field)[index] == bitNum2ColorNum(color::YELLOW))
 		{
 			if (!isExistYellowInColorList)
 			{
@@ -266,13 +289,18 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 			}
 			else
 			{
+				cv::MatND hist_all_delete;
+				img2Hist(img_split_vec[index], &hist_all_delete);
+				double similar = cv::compareHist(hist_all_delete, hist_, 0);
 				// TODO: patten match in onencv;
 				// use "matten_match" and img_split_img[index]
+				if (similar > 0)
+				{
+					(*field)[index] = color::NONE;
+				}
 			}
 		}
 	}
-
-	
 }												
 
 

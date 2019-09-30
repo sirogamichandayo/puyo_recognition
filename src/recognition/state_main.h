@@ -8,6 +8,8 @@
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgcodecs.hpp>
 #include <algorithm>
 #include <fstream>
 #include <sstream>
@@ -74,6 +76,35 @@ public:
 			{player::HISYA, pic::hisya},
 			{player::KAMESTORY, pic::kamestry}
 		};
+
+		// make "X" histgram.
+		const std::string DIR_PATH = "../../data/AllDelete_X/";
+		cv::Mat img_X = cv::imread(DIR_PATH+"puyo35.jpg");
+		cv::cvtColor(img_X, img_X, cv::COLOR_BGR2HSV);
+
+		cv::MatND hist_X;
+		img2Hist(img_X, hist_X);
+
+		this->InfluenceHistX = \
+		std::make_pair(35, hist_X);
+		
+		// make "All Delete" histgram.
+		std::vector<int> all_delete_indexes{8, 9, 10,
+																				20, 21, 22,
+																				32, 33, 34,
+																				44, 45, 46,
+																				56, 57, 58};
+		for (const auto &index : all_delete_indexes)
+		{
+			// make histgram.
+			const std::string FILE_PATH = DIR_PATH + "puyo" + std::to_string(index) + ".jpg";
+			cv::Mat img_all_delete = cv::imread(FILE_PATH, 1);
+			cv::MatND hist_all_delete;
+			img2Hist(img_all_delete, &hist_all_delete);
+
+			InfluenceHistAllDelete.insert(std::pair<int, cv::MatND>(index, hist_all_delete));
+		}
+		
 	}
 
 	inline void setImg(cv::Mat &img_) {
@@ -83,6 +114,11 @@ public:
 		}
 		cutImg(&img_);
 		this->img = img_;
+	}
+
+	inline void getImg(cv::Mat &img_)
+	{
+		img_ = this->img;
 	}
 
 	bool isGetState(const int &mode);
@@ -98,7 +134,9 @@ private:
 	std::vector<int> puyo_color_list;
 	bool initColorList;
 	bool isExistRedInColorList; // for "X"
-	bool isExistYellowInColorList; // for zenkesi.
+	bool isExistYellowInColorList; // for all delete in other words zenkesi.
+	std::map<int, cv::MatND> InfluenceHistAllDelete;
+	std::pair<int, cv::MatND> InfluenceHistX;
 
 	// debug
 	int count_call_is_next_1p=0;
@@ -116,8 +154,10 @@ private:
 	void toHDImg(cv::Mat *const img_);
 	void paddingImg(const cv::Mat &img_, cv::Mat &img_pad, const float &x1_rate, 
 	      const float &y1_rate, const float &w_rate, const float &h_rate);
+	void img2Hist(const cv::Mat &img_, cv::MatND *const hist_);
 
 	int colorNum2ForBitNum(int color);
+	int bitNum2ColorNum(int color);
 	int getColor(const cv::Mat &img);
 
 	void getPuyoColorSet(std::vector<int> *field, const int& col_num, const int& row_num, 
