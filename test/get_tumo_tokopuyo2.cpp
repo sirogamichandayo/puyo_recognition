@@ -14,9 +14,12 @@ int main()
 {
 	int index = 0;
 	using namespace game;
-	std::vector<int> all_puyo(BOARD_ROWS_NO_IN_1314 * BOARD_COLS +
+	int all_puyo_size = BOARD_ROWS_NO_IN_1314 * BOARD_COLS +
 														NEXT1_ROWS * NEXT2_COLS + 
-														NEXT2_ROWS * NEXT2_COLS);
+														NEXT2_ROWS * NEXT2_COLS;
+	std::vector<int> all_puyo(all_puyo_size);
+	std::vector<std::string> all_puyo_vec(all_puyo_size);
+
 	ScreenShot src = ScreenShot::getScreenShot("three");
 	cv::Mat img;
 	State env(player::DEFAULT);
@@ -25,8 +28,9 @@ int main()
 		src >> img;
 		env.setImg(img);
 
-		env.getState(get_mode::allPuyo_1p, all_puyo);
-		for (const auto &elem:all_puyo)
+		env.getState(get_mode::allPuyo_1p, all_puyo, true);
+		env.colorNum2ColorStringForVec(all_puyo, &all_puyo_vec);
+		for (const auto &elem : all_puyo_vec)
 		{
 			std::ostringstream ss;
 			ss << std::setw(3) << std::setfill('0') << index++ << " : " << elem;

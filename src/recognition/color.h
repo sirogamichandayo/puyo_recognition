@@ -18,7 +18,7 @@ namespace color
 	unsigned const int PURPLE = 8;			// purple
 	unsigned const int WHITE = 9;
 	unsigned const int OTHER = 10;
-	unsigned const int MISS = 9;
+	unsigned const int MISS = 9999999;
 	}; // namespace tumo
 
 class HSV

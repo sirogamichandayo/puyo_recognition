@@ -56,7 +56,7 @@ void State::getState(const int &mode, int &issue)
 	std::exit(0);
 }
 
-void State::getState(const int &mode, std::vector<int> &field)
+void State::getState(const int &mode, std::vector<int> &field, bool isColorNum)
 {
 	if (mode == get_mode::allPuyo_1p)
 	{
@@ -81,7 +81,6 @@ void State::getState(const int &mode, std::vector<int> &field)
 		std::move(next1.begin(), next1.end(), begin+=board.size());
 		std::move(next2.begin(), next2.end(), begin+=next1.size());
 
-		return;
 	}
 	else if (mode == get_mode::allPuyo_2p)
 	{
@@ -105,7 +104,6 @@ void State::getState(const int &mode, std::vector<int> &field)
 		std::move(next1.begin(), next1.end(), begin+=board.size());
 		std::move(next2.begin(), next2.end(), begin+=next1.size());
 
-		return;
 	}
 	 else 
 	{
@@ -113,6 +111,44 @@ void State::getState(const int &mode, std::vector<int> &field)
 	LOG("No exist mode.");
 	std::exit(0);
 	}
+
+	if (isColorNum)
+		bitNum2ColorNumForVec(&field);
+}
+
+void State::bitNum2ColorNumForVec(std::vector<int> *const field)
+{
+	if (!initColorList)
+	{
+		LOG("Not initialized initColorList in State Class.");
+		std::exit(1);
+	}
+	for (auto& elem : *field)
+	{
+		elem = bitNum2ColorNum(elem);
+	}
+}
+
+void State::colorNum2bitNumForVec(std::vector<int> *const field)
+{
+	if (!initColorList)
+	{
+		LOG("Not initialized initColorList in State Class.");
+		std::exit(1);
+	}
+	for (auto elem : *field)
+	{
+		elem = colorNum2ForBitNum(elem);
+	}
+}
+
+void State::colorNum2ColorStringForVec(const std::vector<int> &field_int, 
+																	std::vector<std::string> *const field_str)
+{
+	int size = field_int.size();
+	initializeField(&size, field_str);
+	for (int i = 0; i < size; ++i)
+		colorNum2ColorString(field_int[i], &((*field_str)[i]));
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -121,12 +157,13 @@ void State::getState(const int &mode, std::vector<int> &field)
 void State::toHDImg(cv::Mat *const img_)
 {
 	cv::resize(*img_, *img_, cv::Size(), 
-						 (static_cast<double>(pic::HD_WIDTH)  / img_->cols),
-						 (static_cast<double>(pic::HD_HEIGHT) / img_->rows));
+						(static_cast<double>(pic::HD_WIDTH)  / img_->cols),
+						(static_cast<double>(pic::HD_HEIGHT) / img_->rows));
 }
 
 void State::cutImg(cv::Mat *const img_)
 {
+	// TODO: change range for to find key.
 	if (player == player::DEFAULT)
 		return;
 	for (const auto &[p_, rect_] : player_resize)
@@ -162,9 +199,15 @@ void State::paddingImg(const cv::Mat &img_, cv::Mat &img_pad,
 
 void State::img2Hist(const cv::Mat &img_, cv::MatND *const hist_)
 {
-	cv::resize(img_, img_, cv::Size(), 0.5, 0.5);
+	cv::Mat image;
+	// When judgint the color::YELLOW or backgraund "zenkasi", 
+	// sensitive to surrounding background.
+	// So I make padding size if bigger.
+	image = img_;
+
+	// cv::resize(image, image, cv::Size(), 0.2, 0.2);
 	
-	int h_bins = 50, int s_bins = 60;
+	int h_bins = 30; int s_bins = 40;
 	int histSize[] = {h_bins, s_bins};
 
 	float h_ranges[] = {0, 180};
@@ -175,12 +218,12 @@ void State::img2Hist(const cv::Mat &img_, cv::MatND *const hist_)
 	// We use HSV images, In this case H, S are used.
 	int channels[] = {0, 1};
 
-	cv::calcHist(&img_, 1, channels, cv::Mat(), hist_, 2, 
-								histSize, range, true, false);
-	cv::normalize(hist_, hist_, 0, 1, NORM_MINMAX, -1, cv::Mat());
+	cv::calcHist(&image, 1, channels, cv::Mat(), *hist_, 2, 
+								histSize, ranges, true, false);
+	cv::normalize(*hist_, *hist_, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
 }
 
-int State::colorNum2ForBitNum(int color)
+int State::colorNum2ForBitNum(const int &color)
 {
 	/*
 		 Puyo real color has no measning.
@@ -203,7 +246,7 @@ int State::colorNum2ForBitNum(int color)
 	return color::MISS;
 }
 
-int State::bitNum2ColorNum(int color)
+int State::bitNum2ColorNum(const int &color)
 {
 	if (color == color::NONE || color == color::DIST)
 		return color;
@@ -218,6 +261,49 @@ int State::bitNum2ColorNum(int color)
 	
 	LOG("Change miss bit number to color number.");
 	return color::MISS;
+}
+
+void State::colorNum2ColorString(const int &color, std::string *const str)
+{
+	switch(color)
+	{
+	case color::NONE:
+		*str = "NONE";
+		break;
+	case color::DIST:
+		*str = "DIST";
+		break;
+	case color::WALL:
+		*str = "WALL";
+		break;
+	case color::IRON:
+		*str = "IRON";
+		break;
+	case color::RED:
+		*str = "RED";
+		break;
+	case color::BLUE:
+		*str = "BLUE";
+		break;
+	case color::YELLOW:
+		*str = "YELLOW";
+		break;
+	case color::GREEN:
+		*str = "GREEN";
+		break;
+	case color::PURPLE:
+		*str = "PURPLE";
+		break;
+	case color::WHITE:
+		*str = "WHITE";
+		break;
+	case color::OTHER:
+		*str = "OTHER";
+		break;
+	default:
+		*str = "MISS";
+		break;
+	}
 }
 
 void State::getPuyoColorSet(std::vector<int> *const field, 
@@ -265,41 +351,51 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 			cv::MatND hist_X;
 			img2Hist(img_split_vec[InfluenceHistX.first], &hist_X);
 			double similar = cv::compareHist(hist_X, InfluenceHistX.second, 0);
-			if (similar > 0);
+			if (similar > 0.3)
 			{
-				// debug code
-				(*field)[InfluenceHistX.first] = similar;
-				// (*field)[InfluenceHistX.first] = color::NONE;
+				(*field)[InfluenceHistX.first] = color::NONE;
 			}
-			else if (true /*machne learning*/)
-			{
-				// machne learning?.
-			} 
 		}
+	}
+
+	// debug
+	for (const auto &[index_AD, hist_] : InfluenceHistAllDelete)
+	{
+		cv::MatND hist_all_delete;
+		img2Hist(img_split_vec[index_AD], &hist_all_delete);
+		double similar = cv::compareHist(hist_, hist_all_delete, 0);
+		std::cout << "similar (" << index_AD << ") : " << similar << std::endl;
 	}
 
 	// this code that to judge between "all delete" or not,
 	for (const auto &[index_AD, hist_]: InfluenceHistAllDelete)		
 	{
-		if ((*field)[index] == bitNum2ColorNum(color::YELLOW))
+			
+		if ((*field)[index_AD] == colorNum2ForBitNum(color::YELLOW))
 		{
 			if (!isExistYellowInColorList)
 			{
-				(*field)[index] = color::NONE;
+				(*field)[index_AD] = color::NONE;
 			}
 			else
 			{
 				cv::MatND hist_all_delete;
-				img2Hist(img_split_vec[index], &hist_all_delete);
+				img2Hist(img_split_vec[index_AD], &hist_all_delete);
 				double similar = cv::compareHist(hist_all_delete, hist_, 0);
-				// TODO: patten match in onencv;
-				// use "matten_match" and img_split_img[index]
-				if (similar > 0)
+				if (similar > 0.5)
 				{
-					(*field)[index] = color::NONE;
+					(*field)[index_AD] = color::NONE;
 				}
 			}
 		}
+		/*
+		if (((*field)[index_AD] == colorNum2ForBitNum(color::YELLOW) && \
+				isExistYellowInColorList) || \
+				(*field)[index_AD] == color::DIST)
+		{
+			continue;
+		}
+		*/
 	}
 }												
 
@@ -589,8 +685,8 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 	if (is_exist_next)
 		color_pixel_dict[color::NONE]*=3.0;
 
-	saveColorAndImg(color_pixel_dict.begin(), color_pixel_dict.end(), image_padding);
-	showForDebug(image_padding);
+	// saveColorAndImg(color_pixel_dict.begin(), color_pixel_dict.end(), image);
+	// showForDebug(image_padding);
 	
 	std::pair<int, int> max_color = *std::max_element
 		(color_pixel_dict.begin(), color_pixel_dict.end(),

@@ -66,11 +66,11 @@ class State
 {
 public:
 	State(const int &player_ = player::DEFAULT)
+		: player(player_), initColorList(false), 
+			isExistRedInColorList(false),
+			isExistYellowInColorList(false)
 	{
-		this->player = player_;
 		this->puyo_color_list.reserve(color::PUYO_COLOR_NUM);
-		this->initColorList = false;
-		this->isExistRedInColorList = false;
 		this->player_resize = {
 			{player::MOMOKEN, pic::momoken},
 			{player::HISYA, pic::hisya},
@@ -78,12 +78,12 @@ public:
 		};
 
 		// make "X" histgram.
-		const std::string DIR_PATH = "../../data/AllDelete_X/";
-		cv::Mat img_X = cv::imread(DIR_PATH+"puyo35.jpg");
+		const std::string DIR_PATH = "../data/AllDelete_X/";
+		cv::Mat img_X = cv::imread(DIR_PATH+"puyo35.jpg", 1);
 		cv::cvtColor(img_X, img_X, cv::COLOR_BGR2HSV);
 
 		cv::MatND hist_X;
-		img2Hist(img_X, hist_X);
+		img2Hist(img_X, &hist_X);
 
 		this->InfluenceHistX = \
 		std::make_pair(35, hist_X);
@@ -93,18 +93,20 @@ public:
 																				20, 21, 22,
 																				32, 33, 34,
 																				44, 45, 46,
-																				56, 57, 58};
+																				56, 57, 58,
+																				68, 69};
 		for (const auto &index : all_delete_indexes)
 		{
 			// make histgram.
 			const std::string FILE_PATH = DIR_PATH + "puyo" + std::to_string(index) + ".jpg";
 			cv::Mat img_all_delete = cv::imread(FILE_PATH, 1);
+			cv::cvtColor(img_all_delete, img_all_delete, cv::COLOR_BGR2HSV);
+
 			cv::MatND hist_all_delete;
 			img2Hist(img_all_delete, &hist_all_delete);
 
 			InfluenceHistAllDelete.insert(std::pair<int, cv::MatND>(index, hist_all_delete));
 		}
-		
 	}
 
 	inline void setImg(cv::Mat &img_) {
@@ -125,7 +127,11 @@ public:
 	/* ex : (Win, Lose, Drow)*/
 	void getState(const int &mode, int &issue);
 	// Mainly use to get field or next
-	void getState(const int &mode, std::vector<int> &field);
+	void getState(const int &mode, std::vector<int> &field, bool isColorNum=false);
+
+	void bitNum2ColorNumForVec(std::vector<int> *const field);
+	void colorNum2bitNumForVec(std::vector<int> *const field);
+	void colorNum2ColorStringForVec(const std::vector<int> &field_int, std::vector<std::string> *const field_str);
 
 private:
 	std::map<unsigned int, cv::Rect> player_resize;
@@ -145,7 +151,7 @@ private:
 	template <typename T>
 	void initializeField(const int *const size, std::vector<T> *const field)
 	{
-		field->clear();
+		std::vector<T> ().swap(*field);
 		if (field->size() != *size)
 			field->resize(*size);
 	}
@@ -154,16 +160,18 @@ private:
 	void toHDImg(cv::Mat *const img_);
 	void paddingImg(const cv::Mat &img_, cv::Mat &img_pad, const float &x1_rate, 
 	      const float &y1_rate, const float &w_rate, const float &h_rate);
+	void splitImage(const cv::Mat &image, const int &col_num,
+									const int &row_num, std::vector<cv::Mat> *const image_vec);
+
 	void img2Hist(const cv::Mat &img_, cv::MatND *const hist_);
 
-	int colorNum2ForBitNum(int color);
-	int bitNum2ColorNum(int color);
+	int colorNum2ForBitNum(const int& color);
+	int bitNum2ColorNum(const int& color);
+	void colorNum2ColorString(const int& color, std::string *const str);
 	int getColor(const cv::Mat &img);
 
 	void getPuyoColorSet(std::vector<int> *field, const int& col_num, const int& row_num, 
 									const cv::Rect &target_rect);
-	void splitImage(const cv::Mat &image, const int &col_num,
-									const int &row_num, std::vector<cv::Mat> *const image_vec);
 	/*
 	I'm not goint to implement it for amination.
 	void getMyOjamaCount_1p(std::vector<int> &field);
@@ -184,7 +192,7 @@ private:
 		cv::Mat img_rgb;
 		cv::cvtColor(image, img_rgb, CV_HSV2BGR);
 		cv::imshow("debug", img_rgb);
-		cv::waitKey(100);
+		cv::waitKey(1000);
 	}
 	
 	template<class InputIterator>
