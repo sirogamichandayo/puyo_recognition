@@ -20,6 +20,7 @@
 #include <vector>
 #include <string>
 #include <omp.h>
+#include <memory>
 #include <thread>
 #include <iostream>
 #include <map>
@@ -65,11 +66,12 @@ unsigned const int DROW = 3;
 class State
 {
 public:
-	State(const int &player_ = player::DEFAULT)
+	State(ScreenShot *const scr_, const int &player_ = player::DEFAULT)
 		: player(player_), initColorList(false), 
 			isExistRedInColorList(false),
 			isExistYellowInColorList(false)
 	{
+		this->scr = scr_;
 		this->puyo_color_list.reserve(color::PUYO_COLOR_NUM);
 		this->player_resize = {
 			{player::MOMOKEN, pic::momoken},
@@ -80,13 +82,15 @@ public:
 		// make "X" histgram.
 		const std::string DIR_PATH = "../data/AllDelete_X/";
 		cv::Mat img_X = cv::imread(DIR_PATH+"puyo35.jpg", 1);
+		this->InfluenceImgX = \
+			std::make_pair(35, img_X);
+
 		cv::cvtColor(img_X, img_X, cv::COLOR_BGR2HSV);
 
 		cv::MatND hist_X;
 		img2Hist(img_X, &hist_X);
-
 		this->InfluenceHistX = \
-		std::make_pair(35, hist_X);
+			std::make_pair(35, hist_X);
 		
 		// make "All Delete" histgram.
 		std::vector<int> all_delete_indexes{8, 9, 10,
@@ -101,12 +105,20 @@ public:
 			const std::string FILE_PATH = DIR_PATH + "puyo" + std::to_string(index) + ".jpg";
 			cv::Mat img_all_delete = cv::imread(FILE_PATH, 1);
 			cv::cvtColor(img_all_delete, img_all_delete, cv::COLOR_BGR2HSV);
+			InfluenceImgAllDelete.insert(std::pair<int, cv::MatND>(index, img_all_delete));
+
 
 			cv::MatND hist_all_delete;
 			img2Hist(img_all_delete, &hist_all_delete);
-
 			InfluenceHistAllDelete.insert(std::pair<int, cv::MatND>(index, hist_all_delete));
 		}
+	}
+
+	inline void step()
+	{
+		cv::Mat image;
+		(*scr) >> image;
+		setImg(image);
 	}
 
 	inline void setImg(cv::Mat &img_) {
@@ -122,6 +134,7 @@ public:
 	{
 		img_ = this->img;
 	}
+
 
 	bool isGetState(const int &mode);
 	/* ex : (Win, Lose, Drow)*/
@@ -142,7 +155,10 @@ private:
 	bool isExistRedInColorList; // for "X"
 	bool isExistYellowInColorList; // for all delete in other words zenkesi.
 	std::map<int, cv::MatND> InfluenceHistAllDelete;
+	std::map<int, cv::Mat>   InfluenceImgAllDelete;
 	std::pair<int, cv::MatND> InfluenceHistX;
+	std::pair<int, cv::Mat>   InfluenceImgX;
+	ScreenShot *scr;
 
 	// debug
 	int count_call_is_next_1p=0;
@@ -187,7 +203,42 @@ private:
 	int toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next=false);
 
 	// For debug
-	void showForDebug(const cv::Mat &image)
+	template<class saveIterator>
+	void saveImg(saveIterator begin, saveIterator end, const std::string& dir_path, bool is_hsv=false)
+	{
+		cv::Mat img;
+		// TODO: append .jpg
+		for (;begin != end; ++begin)
+		{
+			if (is_hsv)
+			{
+				cv::cvtColor(begin->second, img, cv::COLOR_HSV2BGR);
+			} else
+			{
+				img = begin->second;
+			}
+
+			std::string file_name = begin->first;
+			std::string extension = file_name.substr(begin->first.size()-4, file_name.size());
+			if (!(".jpg" == extension || ".png" == extension))
+			{
+				file_name+=".jpg";
+			}
+			
+			cv::imwrite(dir_path+file_name, img);
+		}
+	}
+
+	void showForDebug(const std::vector<cv::Mat> &img_vec, int wait, bool is_hsv = false)
+	{
+		cv::Mat image;
+		for (const auto& img_ : img_vec)
+		{
+			showForDebug(img_, wait, is_hsv);
+		}
+	}
+	
+	void showForDebug(const cv::Mat &image, int wait, bool is_hsv = false)
 	{
 		cv::Mat img_rgb;
 		cv::cvtColor(image, img_rgb, CV_HSV2BGR);
@@ -222,6 +273,7 @@ private:
 
 		std::string str = "";
 		str += ss.str();
+		
 		for (auto const& color : color_list)
 		{
 			std::ostringstream ss_color, ss_num;

@@ -200,14 +200,14 @@ void State::paddingImg(const cv::Mat &img_, cv::Mat &img_pad,
 void State::img2Hist(const cv::Mat &img_, cv::MatND *const hist_)
 {
 	cv::Mat image;
+	paddingImg(img_, image, 0.1, 0.1, 0.8, 0.8);
 	// When judgint the color::YELLOW or backgraund "zenkasi", 
 	// sensitive to surrounding background.
 	// So I make padding size if bigger.
-	image = img_;
 
 	// cv::resize(image, image, cv::Size(), 0.2, 0.2);
 	
-	int h_bins = 30; int s_bins = 40;
+	int h_bins = 90; int s_bins = 128;
 	int histSize[] = {h_bins, s_bins};
 
 	float h_ranges[] = {0, 180};
@@ -358,17 +358,55 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 		}
 	}
 
+/*
 	// debug
-	for (const auto &[index_AD, hist_] : InfluenceHistAllDelete)
+	LOG("yellow");
+	for (const auto &[index_AD, img_AD] : InfluenceImgAllDelete)
 	{
-		cv::MatND hist_all_delete;
-		img2Hist(img_split_vec[index_AD], &hist_all_delete);
-		double similar = cv::compareHist(hist_, hist_all_delete, 0);
-		std::cout << "similar (" << index_AD << ") : " << similar << std::endl;
+		cv::Mat diff;
+		cv::absdiff(img_split_vec[63], img_AD, diff);
+		std::vector<cv::Mat> diff_channels;
+		cv::split(diff, diff_channels);
+		double max_v, min_v;
+		cv::minMaxLoc(diff_channels[2], &min_v, &max_v, nullptr, nullptr);
+		int mean_v;
+		mean_v = (int)cv::mean(diff_channels[2])[0];
+		std::cout << "(mean, max, min) -> ("  << mean_v << ", " << max_v << ", " << min_v << ")" << std::endl;		
+	}
+	*/
+
+	LOG("teacher");
+	for (const auto &[index_AD, img_AD] : InfluenceImgAllDelete)
+	{
+		cv::Mat diff;
+		cv::absdiff(img_split_vec[index_AD], img_AD, diff);
+		std::vector<cv::Mat> diff_channels;
+		cv::split(diff, diff_channels);
+		double max_v, min_v;
+		cv::minMaxLoc(diff_channels[2], &min_v, &max_v, nullptr, nullptr);
+		int mean_v;
+		mean_v = (int)cv::mean(diff_channels[2])[0];
+		std::cout << index_AD << "(mean, max, min) -> ("  << mean_v << ", " << max_v << ", " << min_v << ")" << std::endl;
 	}
 
+	/*
+	std::map<std::string, cv::Mat> save_img;
+	for (const auto &[index_AD, img_] : InfluenceImgAllDelete)
+	{
+		cv::MatND hist_, hist_all_delete;
+		img2Hist(img_split_vec[index_AD], &hist_all_delete);
+		img2Hist(img_, &hist_);
+		double similar = cv::compareHist(hist_, hist_all_delete, 0);
+		std::cout << "similar (" << index_AD << ") : " << similar << std::endl;
+		save_img.insert(std::pair<std::string, cv::Mat>(std::to_string(index_AD)+"REF_IMAGE", img_));
+		save_img.insert(std::pair<std::string, cv::Mat>(std::to_string(index_AD)+"ORIGIN_IMAGE", img_split_vec[index_AD]));
+	}
+	std::string dir_path = "/mnt/programming/data/MO/tokopuyo/recognition_similar_AD/";
+	saveImg(save_img.begin(), save_img.end(), dir_path, true);
+	*/
+
 	// this code that to judge between "all delete" or not,
-	for (const auto &[index_AD, hist_]: InfluenceHistAllDelete)		
+	for (const auto &[index_AD, img_AD]: InfluenceImgAllDelete)		
 	{
 			
 		if ((*field)[index_AD] == colorNum2ForBitNum(color::YELLOW))
@@ -379,13 +417,17 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 			}
 			else
 			{
-				cv::MatND hist_all_delete;
-				img2Hist(img_split_vec[index_AD], &hist_all_delete);
-				double similar = cv::compareHist(hist_all_delete, hist_, 0);
-				if (similar > 0.5)
+				cv::Mat diff;
+				cv::absdiff(img_split_vec[index_AD], img_AD, diff);
+				std::vector<cv::Mat> diff_channels;
+				cv::split(diff, diff_channels);
+				double max_v;
+				cv::minMaxLoc(diff_channels[2], nullptr, &max_v, nullptr, nullptr);
+				if (100 > max_v)
 				{
 					(*field)[index_AD] = color::NONE;
 				}
+				
 			}
 		}
 		/*
@@ -397,6 +439,16 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 		}
 		*/
 	}
+
+	// don't think about floating the color other than color::NONE. (again)
+	for (int i = 1; i < game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314; ++i)
+	{
+		if (i % 12 == 0) continue;
+			
+		if ((*field)[i-1] == color::NONE && (*field)[i] != color::NONE)
+			(*field)[i] = color::NONE;
+	}
+
 }												
 
 
@@ -685,7 +737,11 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 	if (is_exist_next)
 		color_pixel_dict[color::NONE]*=3.0;
 
-	// saveColorAndImg(color_pixel_dict.begin(), color_pixel_dict.end(), image);
+	// for puyo eye.
+	if (color_pixel_dict[color::NONE] >= 5)
+		color_pixel_dict[color::NONE]-=5;
+
+	saveColorAndImg(color_pixel_dict.begin(), color_pixel_dict.end(), image);
 	// showForDebug(image_padding);
 	
 	std::pair<int, int> max_color = *std::max_element
