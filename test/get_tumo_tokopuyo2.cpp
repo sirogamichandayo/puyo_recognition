@@ -19,14 +19,12 @@ int main()
 														NEXT2_ROWS * NEXT2_COLS;
 	std::vector<int> all_puyo(all_puyo_size);
 	std::vector<std::string> all_puyo_vec(all_puyo_size);
-
-	ScreenShot src = ScreenShot::getScreenShot("three");
+	ScreenShot scr = ScreenShot::getScreenShot("three");
 	cv::Mat img;
-	State env(player::DEFAULT);
+	State env(&scr, player::DEFAULT);
 	for (int i = 0; i < 1; ++i)
 	{
-		src >> img;
-		env.setImg(img);
+		env.step();
 
 		env.getState(get_mode::allPuyo_1p, all_puyo, true);
 		env.colorNum2ColorStringForVec(all_puyo, &all_puyo_vec);
