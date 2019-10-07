@@ -5,6 +5,7 @@
 #include "./color.h"
 #include "./screen_shot.h"
 #include "./env_img.h"
+#include "../tools/debug.h"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
@@ -24,6 +25,7 @@
 #include <thread>
 #include <iostream>
 #include <map>
+#include <sys/stat.h>
 
 namespace game
 {
@@ -146,7 +148,7 @@ public:
 	void colorNum2bitNumForVec(std::vector<int> *const field);
 	void colorNum2ColorStringForVec(const std::vector<int> &field_int, std::vector<std::string> *const field_str);
 
-private:
+protected:	
 	std::map<unsigned int, cv::Rect> player_resize;
 	int player;
 	cv::Mat img;
@@ -154,14 +156,11 @@ private:
 	bool initColorList;
 	bool isExistRedInColorList; // for "X"
 	bool isExistYellowInColorList; // for all delete in other words zenkesi.
-	std::map<int, cv::MatND> InfluenceHistAllDelete;
+	std::map<int, cv::MatND> InfluenceHistAllDelete; // Plan to delete.
 	std::map<int, cv::Mat>   InfluenceImgAllDelete;
-	std::pair<int, cv::MatND> InfluenceHistX;
+	std::pair<int, cv::MatND> InfluenceHistX; // Plan to delete.
 	std::pair<int, cv::Mat>   InfluenceImgX;
 	ScreenShot *scr;
-
-	// debug
-	int count_call_is_next_1p=0;
 
 
 	template <typename T>
@@ -187,7 +186,7 @@ private:
 	int getColor(const cv::Mat &img);
 
 	void getPuyoColorSet(std::vector<int> *field, const int& col_num, const int& row_num, 
-									const cv::Rect &target_rect);
+									const cv::Rect &target_rect, const std::string &dir_path );
 	/*
 	I'm not goint to implement it for amination.
 	void getMyOjamaCount_1p(std::vector<int> &field);
@@ -202,93 +201,6 @@ private:
 	void getResult(int *const result);		
 	int toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next=false);
 
-	// For debug
-	template<class saveIterator>
-	void saveImg(saveIterator begin, saveIterator end, const std::string& dir_path, bool is_hsv=false)
-	{
-		cv::Mat img;
-		// TODO: append .jpg
-		for (;begin != end; ++begin)
-		{
-			if (is_hsv)
-			{
-				cv::cvtColor(begin->second, img, cv::COLOR_HSV2BGR);
-			} else
-			{
-				img = begin->second;
-			}
-
-			std::string file_name = begin->first;
-			std::string extension = file_name.substr(begin->first.size()-4, file_name.size());
-			if (!(".jpg" == extension || ".png" == extension))
-			{
-				file_name+=".jpg";
-			}
-			
-			cv::imwrite(dir_path+file_name, img);
-		}
-	}
-
-	void showForDebug(const std::vector<cv::Mat> &img_vec, int wait, bool is_hsv = false)
-	{
-		cv::Mat image;
-		for (const auto& img_ : img_vec)
-		{
-			showForDebug(img_, wait, is_hsv);
-		}
-	}
-	
-	void showForDebug(const cv::Mat &image, int wait, bool is_hsv = false)
-	{
-		cv::Mat img_rgb;
-		cv::cvtColor(image, img_rgb, CV_HSV2BGR);
-		cv::imshow("debug", img_rgb);
-		cv::waitKey(1000);
-	}
-	
-	template<class InputIterator>
-	void saveColorAndImg(InputIterator begin, InputIterator end, const cv::Mat &img_)
-	{
-		cv::Mat img_hsv;
-		cv::cvtColor(img_, img_hsv, CV_HSV2BGR);
-
-		const std::string path = "/mnt/programming/data/MO/tokopuyo/recognition_data2/";
-		std::ofstream write_file;
-		if (count_call_is_next_1p == 0)
-			write_file.open(path+"color_elem.txt", std::ios::trunc);
-		else
-			write_file.open(path+"color_elem.txt", std::ios_base::app);
-		std::array<std::string, 7> color_list = {
-				"NONE",
-				"DIST",
-				"RED",
-				"BLUE",
-				"YELLOW",
-				"GREEN",
-				"PURPLE"
-		};
-
-		std::ostringstream ss;
-		ss << "puyo" << std::setw(3) << std::setfill(' ') << count_call_is_next_1p << " -> ";
-
-		std::string str = "";
-		str += ss.str();
-		
-		for (auto const& color : color_list)
-		{
-			std::ostringstream ss_color, ss_num;
-			ss_color << std::setw(7) << std::setfill(' ') << color << " : ";
-			ss_num << std::setw(3) << std::setfill('0') << begin++->second;
-
-			str += (ss_color.str() + ss_num.str());
-		}
-		str += '\n';
-
-		write_file << str;
-		cv::imwrite(path+"puyo"+std::to_string(count_call_is_next_1p)+".jpg", img_hsv);
-		
-		++count_call_is_next_1p;
-	}
 };
 
 #endif // STATE_MAIN_
