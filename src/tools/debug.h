@@ -1,5 +1,5 @@
 #ifndef _DEBUG_H_
-#define _DEBUG_H_	
+#define _DEBUG_H_
 
 #include "../log/log.h"
 
@@ -16,27 +16,12 @@
 namespace debug
 {
 
-	const std::string DIR_NAME = "/mnt/programming/data/MO/tokopuyo/recognition1/";
-
+	const std::string DIR_PATH = "/mnt/programming/data/MO/tokopuyo/recognition_data8/";
 
 	// For debug and log
-	bool existExstension(const std::string& original, const std::string& extension)
-	{
-		if ('.' != extension[0] && "/" != extension)
-			LOG("Waring : Is \'.\' not necessary? Extension argument is " + extension);
-			
-		int orig_size = original.size();
-		int exte_size = extension.size();
-		return original.substr(orig_size-exte_size, orig_size) == extension;
-	}
+	extern bool existExstension(const std::string& original, const std::string& extension);
 	
-	bool makeDir(const std::string& dir_name)
-	{
-		char *path = new char[256];
-		strcpy(path, (DIR_PATH + dir_name).c_str());
-		delete []path;
-		return mkdir(path, S_IRWXU | S_IRWXG | S_IRWXO);
-	}
+	extern bool makeDir(const std::string& dir_name);
 
 	template<class saveIterator>
 	void saveImg(saveIterator begin, saveIterator end, const std::string &dir_path, bool is_hsv=false) 
@@ -66,35 +51,19 @@ namespace debug
 			std::string log_path_img;
 			if (!(existExstension(dir_path, "/")))
 			{
-				log_path_img = this->DIR_PATH+dir_path+"/"+file_name;
+				log_path_img = DIR_PATH+dir_path+"/"+file_name;
 			}
 			else
 			{
-				log_path_img = this->DIR_PATH+dir_path+file_name;
+				log_path_img = DIR_PATH+dir_path+file_name;
 			}
 			
 			cv::imwrite(log_path_img, img);
 		}
 	}
 
-		
-
-	void showForDebug(const std::vector<cv::Mat> &img_vec, int wait, bool is_hsv = false)
-	{
-		cv::Mat image;
-		for (const auto& img_ : img_vec)
-		{
-			showForDebug(img_, wait, is_hsv);
-		}
-	}
-	
-	void showForDebug(const cv::Mat &image, int wait, bool is_hsv = false)
-	{
-		cv::Mat img_rgb;
-		cv::cvtColor(image, img_rgb, CV_HSV2BGR);
-		cv::imshow("debug", img_rgb);
-		cv::waitKey(1000);
-	}
+	extern void showForDebug(const std::vector<cv::Mat> &img_vec, int wait, bool is_hsv = false);
+	extern void showForDebug(const cv::Mat &image, int wait, bool is_hsv = false);
 
 	template<class saveTextIterator>
 	void saveElem(saveTextIterator begin, saveTextIterator end, const std::string& file_name, bool init=false)
@@ -140,4 +109,4 @@ namespace debug
 	}
 };
 
-#endif // _DEBUG_H_
+#endif 

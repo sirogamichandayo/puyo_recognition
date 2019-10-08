@@ -3,6 +3,7 @@ FILE =
 VER = -std=c++1z
 OPENCV = `pkg-config --cflags opencv` `pkg-config --libs opencv`
 SRC_REC = ../src/recognition/
+TOOL = ../src/tools/
 OP = -O3
 ADD = 
 
@@ -22,7 +23,7 @@ get_tumo_mp4: $(SRC_REC)color.cpp $(SRC_REC)state_main.cpp get_tumo_tokopuyo.cpp
 	$(CC) -o $(FILE) $(VER) $(OP) $(SRC_REC)color.cpp $(SRC_REC)state_main.cpp $(FILE).cpp $(OPENCV) -lX11
 
 get_tumo_screen: $(SRC_REC)color.cpp $(SRC_REC)state_main.cpp get_tumo_tokopuyo1.cpp
-	$(CC) -o $(FILE) $(VER) $(OP) $(SRC_REC)color.cpp $(SRC_REC)state_main.cpp $(FILE).cpp $(OPENCV) -lX11 $(ADD)
+	$(CC) -o $(FILE) $(VER) $(OP) $(SRC_REC)color.cpp $(SRC_REC)state_main.cpp $(TOOL)debug.cpp $(FILE).cpp $(OPENCV) -lX11 $(ADD)
 
 clean:
 	$(RM) *.o

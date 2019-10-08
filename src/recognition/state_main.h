@@ -4,12 +4,10 @@
 // Include screenshotpath
 #include "./color.h"
 #include "./screen_shot.h"
-#include "./env_img.h"
 #include "../tools/debug.h"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
-#include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <algorithm>
 #include <fstream>
@@ -186,7 +184,9 @@ protected:
 	int getColor(const cv::Mat &img);
 
 	void getPuyoColorSet(std::vector<int> *field, const int& col_num, const int& row_num, 
-									const cv::Rect &target_rect, const std::string &dir_path );
+									const cv::Rect &target_rect, const std::string &dir_path = "");
+
+	void complementPuyoColorSet(std::vector<int> *const field, const std::vector<cv::Mat> &img_split_vec, const int &size);
 	/*
 	I'm not goint to implement it for amination.
 	void getMyOjamaCount_1p(std::vector<int> &field);

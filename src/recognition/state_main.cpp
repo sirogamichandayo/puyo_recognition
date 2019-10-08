@@ -321,11 +321,7 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 	cv::Mat img_(this->img, target_rect);
 	std::vector<cv::Mat> img_split_vec(size);
 	splitImage(img_, cols, rows, &img_split_vec);
-	if (dir_path == "")
-	{
-		;
-	}
-	 else 
+	if (dir_path != "")
 	{
 		//////////////////////////////
 		// DEBUG
@@ -337,7 +333,7 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 			std::string file_path_split = "puyo" + std::to_string(i); // for debug
 			img_split_vec_for_debug.insert(std::pair<std::string, cv::Mat>(file_path_split, img_split_vec[i]));
 		}
-		saveImg(img_split_vec_for_debug.begin(), img_split_vec_for_debug.end(), dir_path, true);
+		debug::saveImg(img_split_vec_for_debug.begin(), img_split_vec_for_debug.end(), dir_path, true);
 		/////////////////////////////////
 	}
 
@@ -347,8 +343,14 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 	if (size != game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314)
 		return;
 
+	complementPuyoColorSet(field, img_split_vec, size);
+}	
 
-	// Recognition adjustment of board.
+void State::complementPuyoColorSet(std::vector<int> *const field, 
+																		const std::vector<cv::Mat> &img_split_vec, 
+																		const int &size)
+	{
+		// Recognition adjustment of board.
 
 	// don't think about floating the color other than color::NONE.
 	for (int i = 1; i < game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314; ++i)
@@ -379,33 +381,17 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 		}
 	}
 
-/*
-	// debug
-	LOG("yellow");
-	for (const auto &[index_AD, img_AD] : InfluenceImgAllDelete)
-	{
-		cv::Mat diff;
-		cv::absdiff(img_split_vec[63], img_AD, diff);
-		std::vector<cv::Mat> diff_channels;
-		cv::split(diff, diff_channels);
-		double max_v, min_v;
-		cv::minMaxLoc(diff_channels[2], &min_v, &max_v, nullptr, nullptr);
-		int mean_v;
-		mean_v = (int)cv::mean(diff_channels[2])[0];
-		std::cout << "(mean, max, min) -> ("  << mean_v << ", " << max_v << ", " << min_v << ")" << std::endl;		
-	}
-	*/
 
 	LOG("DEGUB for AD");
 	// Iterator can be anything.
 	std::map<std::string, int> V_for_debug;
-	saveElem(V_for_debug.begin(), V_for_debug.end(), "", true);
+	debug::saveElem(V_for_debug.begin(), V_for_debug.end(), "", true);
 	for (const auto &[index_AD, img_AD] : InfluenceImgAllDelete)
 	{
 		V_for_debug.clear();
 		cv::Mat diff;
 		cv::absdiff(img_split_vec[index_AD], img_AD, diff);
-		cv::resize(diff, diff, cv::Size(), 0.5, 0.5);
+		cv::resize(diff, diff, cv::Size(), 0.1, 0.1);
 		int rows = diff.rows;
 		int cols = diff.cols;
 		for (int y = 0; y < rows; ++y)
@@ -414,7 +400,6 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 			for (int x = 0; x < cols; ++x, ++p)
 			{
 				int v = static_cast<int>((*p)[2]);
-				std::cout << v << std::endl;
 				++V_for_debug[std::to_string((v/20)*20)];
 			}
 		}
@@ -427,9 +412,8 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 		mean_v = (int)cv::mean(diff_channels[2])[0];
 		std::cout << index_AD << "(mean, max, min) -> ("  << mean_v << ", " << max_v << ", " << min_v << ")" << std::endl;
 		*/
-		saveElem(V_for_debug.begin(), V_for_debug.end(), "AD_H");
+		debug::saveElem(V_for_debug.begin(), V_for_debug.end(), "AD_H");
 	}
-
 
 	// this code that to judge between "all delete" or not,
 	for (const auto &[index_AD, img_AD]: InfluenceImgAllDelete)		
@@ -474,8 +458,7 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 			(*field)[i] = color::NONE;
 	}
 
-}												
-
+	}
 
 
 int State::getColor(const cv::Mat &img)
@@ -777,7 +760,7 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 		color_picel_dict_for_debug.insert(std::pair<std::string, int>
 													(color_str, count));
 	}
-	saveElem(color_picel_dict_for_debug.begin(), color_picel_dict_for_debug.end(), "color_elem");
+	debug::saveElem(color_picel_dict_for_debug.begin(), color_picel_dict_for_debug.end(), "color_elem");
 	
 
 	std::pair<int, int> max_color = *std::max_element
