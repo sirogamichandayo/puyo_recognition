@@ -4,6 +4,7 @@
 // Include screenshotpath
 #include "./color.h"
 #include "./screen_shot.h"
+#include "./image_processing.h"
 #include "../tools/debug.h"
 
 #include <opencv2/opencv.hpp>
@@ -24,6 +25,8 @@
 #include <iostream>
 #include <map>
 #include <sys/stat.h>
+
+namespace img_p = image_processing;
 
 namespace game
 {
@@ -88,7 +91,7 @@ public:
 		cv::cvtColor(img_X, img_X, cv::COLOR_BGR2HSV);
 
 		cv::MatND hist_X;
-		img2Hist(img_X, &hist_X);
+		img_p::img2Hist(img_X, &hist_X);
 		this->InfluenceHistX = \
 			std::make_pair(35, hist_X);
 		
@@ -109,7 +112,7 @@ public:
 
 
 			cv::MatND hist_all_delete;
-			img2Hist(img_all_delete, &hist_all_delete);
+			img_p::img2Hist(img_all_delete, &hist_all_delete);
 			InfluenceHistAllDelete.insert(std::pair<int, cv::MatND>(index, hist_all_delete));
 		}
 	}
@@ -124,9 +127,9 @@ public:
 	inline void setImg(cv::Mat &img_) {
 		cv::cvtColor(img_, img_, CV_BGR2HSV);
 		if (img_.cols != pic::HD_WIDTH || img_.rows != pic::HD_HEIGHT) {
-			toHDImg(&img_);
+			img_p::toHDImg(&img_);
 		}
-		cutImg(&img_);
+		cutImgEachPlayer(&img_);
 		this->img = img_;
 	}
 
@@ -164,19 +167,19 @@ protected:
 	template <typename T>
 	void initializeField(const int *const size, std::vector<T> *const field)
 	{
-		std::vector<T> ().swap(*field);
 		if (field->size() != *size)
+		{
+			std::vector<T> ().swap(*field);
 			field->resize(*size);
+		} 
+		else
+		{
+			field->clear();
+		}
+
 	}
 
-	void cutImg(cv::Mat *const img_);
-	void toHDImg(cv::Mat *const img_);
-	void paddingImg(const cv::Mat &img_, cv::Mat &img_pad, const float &x1_rate, 
-	      const float &y1_rate, const float &w_rate, const float &h_rate);
-	void splitImage(const cv::Mat &image, const int &col_num,
-									const int &row_num, std::vector<cv::Mat> *const image_vec);
-
-	void img2Hist(const cv::Mat &img_, cv::MatND *const hist_);
+	void cutImgEachPlayer(cv::Mat *const img_);
 
 	int colorNum2ForBitNum(const int& color);
 	int bitNum2ColorNum(const int& color);

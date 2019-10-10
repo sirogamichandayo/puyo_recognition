@@ -154,14 +154,9 @@ void State::colorNum2ColorStringForVec(const std::vector<int> &field_int,
 ////////////////////////////////////////////////////////////////////////
 /* private */
 ////////////////////////////////////////////////////////////////////////
-void State::toHDImg(cv::Mat *const img_)
-{
-	cv::resize(*img_, *img_, cv::Size(), 
-						(static_cast<double>(pic::HD_WIDTH)  / img_->cols),
-						(static_cast<double>(pic::HD_HEIGHT) / img_->rows));
-}
 
-void State::cutImg(cv::Mat *const img_)
+
+void State::cutImgEachPlayer(cv::Mat *const img_)
 {
 	// TODO: change range for to find key.
 	if (player == player::DEFAULT)
@@ -172,55 +167,6 @@ void State::cutImg(cv::Mat *const img_)
 			*img_ = (*img_)(rect_);
 			return;
 		}
-}
-
-void State::paddingImg(const cv::Mat &img_, cv::Mat &img_pad, 
-                       const float &x_rate, const float &y_rate, 
-											 const float &w_rate, const float &h_rate)
-{
-	if (x_rate + w_rate > 1.0 ||
-			y_rate + h_rate > 1.0)
-	{
-		LOG("Out of range");
-		std::exit(0);
-	}
-
-	int cols = img_.cols;
-	int rows = img_.rows;
-
-	int x = cols * x_rate;
-	int y = rows * y_rate;
-	int width = cols * w_rate;
-	int height = rows * h_rate;
-	cv::Rect rect = cv::Rect(x, y, width, height);
-
-	img_pad = img_(rect);
-}
-
-void State::img2Hist(const cv::Mat &img_, cv::MatND *const hist_)
-{
-	cv::Mat image;
-	paddingImg(img_, image, 0.1, 0.1, 0.8, 0.8);
-	// When judgint the color::YELLOW or backgraund "zenkasi", 
-	// sensitive to surrounding background.
-	// So I make padding size if bigger.
-
-	// cv::resize(image, image, cv::Size(), 0.2, 0.2);
-	
-	int h_bins = 90; int s_bins = 128;
-	int histSize[] = {h_bins, s_bins};
-
-	float h_ranges[] = {0, 180};
-	float s_ranges[] = {0, 256};
-
-	const float* ranges[] = {h_ranges, s_ranges};
-
-	// We use HSV images, In this case H, S are used.
-	int channels[] = {0, 1};
-
-	cv::calcHist(&image, 1, channels, cv::Mat(), *hist_, 2, 
-								histSize, ranges, true, false);
-	cv::normalize(*hist_, *hist_, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
 }
 
 int State::colorNum2ForBitNum(const int &color)
@@ -320,7 +266,7 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 
 	cv::Mat img_(this->img, target_rect);
 	std::vector<cv::Mat> img_split_vec(size);
-	splitImage(img_, cols, rows, &img_split_vec);
+	img_p::splitImage(img_, cols, rows, &img_split_vec);
 	if (dir_path != "")
 	{
 		//////////////////////////////
@@ -372,7 +318,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 		else
 		{
 			cv::MatND hist_X;
-			img2Hist(img_split_vec[InfluenceHistX.first], &hist_X);
+			img_p::img2Hist(img_split_vec[InfluenceHistX.first], &hist_X);
 			double similar = cv::compareHist(hist_X, InfluenceHistX.second, 0);
 			if (similar > 0.3)
 			{
@@ -383,9 +329,9 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 
 
 	LOG("DEGUB for AD");
-	// Iterator can be anything.
 	std::map<std::string, int> V_for_debug;
-	debug::saveElem(V_for_debug.begin(), V_for_debug.end(), "", true);
+
+	// last argument is initialize or not.
 	for (const auto &[index_AD, img_AD] : InfluenceImgAllDelete)
 	{
 		V_for_debug.clear();
@@ -412,7 +358,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 		mean_v = (int)cv::mean(diff_channels[2])[0];
 		std::cout << index_AD << "(mean, max, min) -> ("  << mean_v << ", " << max_v << ", " << min_v << ")" << std::endl;
 		*/
-		debug::saveElem(V_for_debug.begin(), V_for_debug.end(), "AD_H");
+		// debug::saveElem(V_for_debug.begin(), V_for_debug.end(), "AD_H");
 	}
 
 	// this code that to judge between "all delete" or not,
@@ -485,6 +431,7 @@ int State::getColor(const cv::Mat &img)
 				isExistYellowInColorList = true;
 		}
 	}
+	
 	return colorNum2ForBitNum(color);
 }
 
@@ -498,49 +445,6 @@ bool State::isExistNext_2p()
 {
 	cv::Mat is_next_img_2p(this->img, pic::is_next_2p);
 	return (color::NONE != toGetPuyoColorPerPiece(is_next_img_2p, true));
-}
-
-void State::splitImage(const cv::Mat &image, 
-											const int &col_num, const int &row_num, 
-											std::vector<cv::Mat> *const image_vec)
-{
-	int size = col_num * row_num;
-	int cols = image.cols;
-	int rows = image.rows;
-
-	int split_cols = cols / col_num;
-	int split_rows = rows / row_num;
-
-	std::vector<cv::Rect> crop_vec(size);
-
-	/* Order of cutting.
-	+=========+
-	|4|8|12|16|
-	|3|7|11|15|
-	|2|6|10|14|
-	|1|5|9 |13|
-	+=========+
-	*/
-	for (int c = 0; c < col_num; ++c)
-	{
-		int cols_ = c * split_cols;
-		int index_cols = c * row_num;
-		for (int r = 0; r < row_num; ++r)
-		{
-			int rows_ = (row_num - (r + 1)) * split_rows;
-			cv::Rect rec = cv::Rect(cols_, rows_, split_cols, split_rows);
-			crop_vec[index_cols + r] = rec;
-		}
-	}
-
-	// initialize.
-	initializeField(&size, image_vec);
-
-	for (int i = 0; i < size; ++i)
-	{
-		cv::Mat cropped(image, crop_vec[i]);
-		(*image_vec)[i] = cropped;
-	}
 }
 
 //  TODO: include constant(pic, )
@@ -704,9 +608,9 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 	cv::Mat image_padding;
 	// for exist next
 	if (is_exist_next)
-		paddingImg(image, image_padding, 0.1, 0.35, 0.8, 0.65);
+		img_p::paddingImg(image, image_padding, 0.1, 0.35, 0.8, 0.65);
 	else
-		paddingImg(image, image_padding, 0.1, 0.1, 0.8, 0.8);
+		img_p::paddingImg(image, image_padding, 0.1, 0.1, 0.8, 0.8);
 	
 	// Receive image(piece puyo), and judge puyo color
 	float size = 0.1;
@@ -752,16 +656,34 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 	/////////////////////////////////////////////////
 	// DEBUG
 	// save element count of color of puyo color per piece.
-	std::map<std::string, int> color_picel_dict_for_debug;
+	static int color_elem_count = 0;
+	std::vector<std::string> title_csv;
+	title_csv.reserve(10);
+	title_csv.push_back("puyoId");
+
+	std::vector<std::vector<int>> data_vec_vec;
+
+	std::vector<int> data_vec;
+	data_vec.reserve(10);
+	data_vec.push_back(color_elem_count);
+
+	// degub
 	for (const auto &[color_num, count] : color_pixel_dict)
 	{
 		std::string color_str;
 		colorNum2ColorString(color_num, &color_str);
-		color_picel_dict_for_debug.insert(std::pair<std::string, int>
-													(color_str, count));
+		title_csv.push_back(color_str);
+		data_vec.push_back(count);
 	}
-	debug::saveElem(color_picel_dict_for_debug.begin(), color_picel_dict_for_debug.end(), "color_elem");
-	
+	data_vec_vec.push_back(data_vec);
+	std::pair<std::vector<std::string>, std::vector<std::vector<int>>> 
+			color_pixel_dict_csv = std::make_pair(title_csv, data_vec_vec);
+	if (!color_elem_count)
+		debug::saveElem(color_pixel_dict_csv, "color_elem.csv", true);
+	else
+		debug::saveElem(color_pixel_dict_csv, "color_elem.csv", false);
+	++color_elem_count;
+	//
 
 	std::pair<int, int> max_color = *std::max_element
 		(color_pixel_dict.begin(), color_pixel_dict.end(),
