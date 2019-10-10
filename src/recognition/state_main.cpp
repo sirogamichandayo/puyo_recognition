@@ -154,9 +154,7 @@ void State::colorNum2ColorStringForVec(const std::vector<int> &field_int,
 ////////////////////////////////////////////////////////////////////////
 /* private */
 ////////////////////////////////////////////////////////////////////////
-
-
-void State::cutImgEachPlayer(cv::Mat *const img_)
+void State::cutImg(cv::Mat *const img_)
 {
 	// TODO: change range for to find key.
 	if (player == player::DEFAULT)
@@ -329,9 +327,9 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 
 
 	LOG("DEGUB for AD");
+	// Iterator can be anything.
 	std::map<std::string, int> V_for_debug;
-
-	// last argument is initialize or not.
+	debug::saveElem(V_for_debug.begin(), V_for_debug.end(), "", true);
 	for (const auto &[index_AD, img_AD] : InfluenceImgAllDelete)
 	{
 		V_for_debug.clear();
@@ -358,7 +356,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 		mean_v = (int)cv::mean(diff_channels[2])[0];
 		std::cout << index_AD << "(mean, max, min) -> ("  << mean_v << ", " << max_v << ", " << min_v << ")" << std::endl;
 		*/
-		// debug::saveElem(V_for_debug.begin(), V_for_debug.end(), "AD_H");
+		debug::saveElem(V_for_debug.begin(), V_for_debug.end(), "AD_H");
 	}
 
 	// this code that to judge between "all delete" or not,
@@ -431,7 +429,6 @@ int State::getColor(const cv::Mat &img)
 				isExistYellowInColorList = true;
 		}
 	}
-	
 	return colorNum2ForBitNum(color);
 }
 
@@ -656,34 +653,16 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 	/////////////////////////////////////////////////
 	// DEBUG
 	// save element count of color of puyo color per piece.
-	static int color_elem_count = 0;
-	std::vector<std::string> title_csv;
-	title_csv.reserve(10);
-	title_csv.push_back("puyoId");
-
-	std::vector<std::vector<int>> data_vec_vec;
-
-	std::vector<int> data_vec;
-	data_vec.reserve(10);
-	data_vec.push_back(color_elem_count);
-
-	// degub
+	std::map<std::string, int> color_picel_dict_for_debug;
 	for (const auto &[color_num, count] : color_pixel_dict)
 	{
 		std::string color_str;
 		colorNum2ColorString(color_num, &color_str);
-		title_csv.push_back(color_str);
-		data_vec.push_back(count);
+		color_picel_dict_for_debug.insert(std::pair<std::string, int>
+													(color_str, count));
 	}
-	data_vec_vec.push_back(data_vec);
-	std::pair<std::vector<std::string>, std::vector<std::vector<int>>> 
-			color_pixel_dict_csv = std::make_pair(title_csv, data_vec_vec);
-	if (!color_elem_count)
-		debug::saveElem(color_pixel_dict_csv, "color_elem.csv", true);
-	else
-		debug::saveElem(color_pixel_dict_csv, "color_elem.csv", false);
-	++color_elem_count;
-	//
+	debug::saveElem(color_picel_dict_for_debug.begin(), color_picel_dict_for_debug.end(), "color_elem");
+	
 
 	std::pair<int, int> max_color = *std::max_element
 		(color_pixel_dict.begin(), color_pixel_dict.end(),

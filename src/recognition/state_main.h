@@ -129,7 +129,7 @@ public:
 		if (img_.cols != pic::HD_WIDTH || img_.rows != pic::HD_HEIGHT) {
 			img_p::toHDImg(&img_);
 		}
-		cutImgEachPlayer(&img_);
+		cutImg(&img_);
 		this->img = img_;
 	}
 
@@ -167,19 +167,12 @@ protected:
 	template <typename T>
 	void initializeField(const int *const size, std::vector<T> *const field)
 	{
+		std::vector<T> ().swap(*field);
 		if (field->size() != *size)
-		{
-			std::vector<T> ().swap(*field);
 			field->resize(*size);
-		} 
-		else
-		{
-			field->clear();
-		}
-
 	}
 
-	void cutImgEachPlayer(cv::Mat *const img_);
+	void cutImg(cv::Mat *const img_);
 
 	int colorNum2ForBitNum(const int& color);
 	int bitNum2ColorNum(const int& color);

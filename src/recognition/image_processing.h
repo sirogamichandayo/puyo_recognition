@@ -15,7 +15,6 @@ namespace image_processing
 	extern void splitImage(const cv::Mat &image, 
 											const int &col_num, const int &row_num, 
 											std::vector<cv::Mat> *const image_vec);
-	extern void cutImg(cv::Mat *const img_);
 	extern void toHDImg(cv::Mat *const img_);
 }
 
