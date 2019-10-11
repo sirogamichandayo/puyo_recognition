@@ -19,19 +19,21 @@ bool debug::makeDir(const std::string& dir_name)
 	return result;
 }
 
-void debug::showForDebug(const std::vector<cv::Mat> &img_vec, int wait, bool is_hsv)
+void debug::showForDebug(const std::vector<cv::Mat> &img_vec, const unsigned int wait, const bool is_hsv)
 {
-	cv::Mat image;
 	for (const auto& img_ : img_vec)
 	{
 		debug::showForDebug(img_, wait, is_hsv);
 	}
 }
 	
-void debug::showForDebug(const cv::Mat &image, int wait, bool is_hsv)
+void debug::showForDebug(const cv::Mat &image, const unsigned int wait, const bool is_hsv)
 {
 	cv::Mat img_rgb;
+	if (is_hsv)
 	cv::cvtColor(image, img_rgb, CV_HSV2BGR);
+	else 
+		img_rgb = image;
 	cv::imshow("debug", img_rgb);
-	cv::waitKey(1000);
+	cv::waitKey(wait);
 }
