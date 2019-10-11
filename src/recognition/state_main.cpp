@@ -258,8 +258,8 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 	int size = cols * rows;
 	if (size != field->size())
 	{
-		LOG("The size of \"field\" is strange.");
-		std::exit(1);
+		LOG("The size of \"field\" is strange. Initialize.");
+	initializeField(&size, &field);
 	}
 
 	cv::Mat img_(this->img, target_rect);
@@ -299,7 +299,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 	// don't think about floating the color other than color::NONE.
 	for (int i = 1; i < game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314; ++i)
 	{
-		if (i % 12 == 0) continue;
+		if (i % game::BOARD_ROWS_NO_IN_1314 == 0) continue;
 			
 		if ((*field)[i-1] == color::NONE && (*field)[i] != color::NONE)
 			(*field)[i] = color::NONE;
