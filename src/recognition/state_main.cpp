@@ -155,18 +155,6 @@ void State::colorNum2ColorStringForVec(const std::vector<int> &field_int,
 /* private */
 ////////////////////////////////////////////////////////////////////////
 void State::cutImg(cv::Mat *const img_)
-{
-	// TODO: change range for to find key.
-	if (player == player::DEFAULT)
-		return;
-	/*
-	for (const auto &[p_, rect_] : player_resize)
-		if (player == p_)
-		{
-			*img_ = (*img_)(rect_);
-			return;
-		}
-		*/
 	*img_ = (*img_)(player_resize[player]);
 }
 
@@ -648,10 +636,9 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 	}
 	if (is_exist_next)
 		color_pixel_dict[color::NONE]*=3.0;
-
-	// for puyo eye.
-	if (color_pixel_dict[color::NONE] >= 5)
-		color_pixel_dict[color::NONE]-=5;
+	
+	if (color_pixel_dict[color::DIST] >= 5)
+		color_pixel_dict[color::DIST]-=5;
 
 	/////////////////////////////////////////////////
 	// DEBUG
@@ -665,6 +652,7 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 													(color_str, count));
 	}
 	debug::saveElem(color_picel_dict_for_debug.begin(), color_picel_dict_for_debug.end(), "color_elem");
+	///////////////////////////////////////////
 	
 
 	std::pair<int, int> max_color = *std::max_element
