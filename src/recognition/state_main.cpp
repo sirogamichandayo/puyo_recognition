@@ -159,12 +159,15 @@ void State::cutImg(cv::Mat *const img_)
 	// TODO: change range for to find key.
 	if (player == player::DEFAULT)
 		return;
+	/*
 	for (const auto &[p_, rect_] : player_resize)
 		if (player == p_)
 		{
 			*img_ = (*img_)(rect_);
 			return;
 		}
+		*/
+	*img_ = (*img_)(player_resize[player]);
 }
 
 int State::colorNum2ForBitNum(const int &color)
