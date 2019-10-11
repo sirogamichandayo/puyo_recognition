@@ -136,7 +136,8 @@ public:
 		if (img_.cols != pic::HD_WIDTH || img_.rows != pic::HD_HEIGHT) {
 			img_p::toHDImg(&img_);
 		}
-		cutImg(&img_);
+		if (this->player =! player::default)
+			cutImg(&img_);
 		this->img = img_;
 	}
 
