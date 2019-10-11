@@ -81,6 +81,13 @@ public:
 			{player::HISYA, pic::hisya},
 			{player::KAMESTORY, pic::kamestry}
 		};
+				
+		// search key in player_resize
+		if (this->player_resize(this->player) == this->player_resize.end())
+		{
+			LOG("Not exist player.");
+			exit(1);
+		}
 
 		// make "X" histgram.
 		const std::string DIR_PATH = "../data/AllDelete_X/";
