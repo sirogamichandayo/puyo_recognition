@@ -121,7 +121,7 @@ void State::bitNum2ColorNumForVec(std::vector<int> *const field)
 	if (!initColorList)
 	{
 		LOG("Not initialized initColorList in State Class.");
-		std::exit(1);
+		
 	}
 	for (auto& elem : *field)
 	{
@@ -134,7 +134,7 @@ void State::colorNum2bitNumForVec(std::vector<int> *const field)
 	if (!initColorList)
 	{
 		LOG("Not initialized initColorList in State Class.");
-		std::exit(1);
+		
 	}
 	for (auto elem : *field)
 	{
