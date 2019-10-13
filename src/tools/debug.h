@@ -62,9 +62,68 @@ namespace debug
 		}
 	}
 
-	extern void showForDebug(const std::vector<cv::Mat> &img_vec, int wait, bool is_hsv = false);
-	extern void showForDebug(const cv::Mat &image, int wait, bool is_hsv = false);
+	extern void showForDebug(const std::vector<cv::Mat> &img_vec, const unsigned int wait, const bool is_hsv = false);
+	extern void showForDebug(const cv::Mat &image, const unsigned int wait, const bool is_hsv = false);
 
+	// for csv.
+	// std::pair<std::vector<std::string>, std::vector<std::vector>>>
+	// std::vector<std::string> title.
+	// std::vector<std::vector> data.
+	template<class csvT>
+	void saveElem(const csvT& csv, const std::string& file_name, const bool overwrite = false)
+	{
+		int title_size = csv.first.size();
+		int data_cols_size = csv.second[0].size();
+		if (title_size != data_cols_size)
+		{
+			LOG("Size is different. Not saved.");
+		}
+
+		std::string SAVE_PATH;
+		if (!(existExstension(file_name, ".txt") || existExstension(file_name, ".csv")))
+		{
+			SAVE_PATH = DIR_PATH + file_name + ".csv";
+		} 
+		else
+		{
+			SAVE_PATH = DIR_PATH + file_name;
+		}
+		std::ofstream write_file;
+
+		if (overwrite)
+		{
+			write_file.open(SAVE_PATH, std::ios::trunc);
+		}
+		else
+		{
+			write_file.open(SAVE_PATH, std::ios_base::app);
+		}
+
+
+		std::string str = "";
+		// write title
+		if (overwrite)
+		{
+			for (int i = 0; i < title_size-1; ++i)
+			{
+				str += (csv.first[i] + ",");
+			}
+			str += (csv.first[title_size-1] + "\n");
+		}
+
+		for (const auto &elem_vec : csv.second)
+		{
+			for (int i = 0; i < data_cols_size; ++i)
+			{
+				str += (std::to_string(elem_vec[i]) + ",");
+			}
+			str += (std::to_string(elem_vec[data_cols_size-1])) + "\n";
+		}
+		write_file << str;
+	}
+
+	// for display.
+	// std::map<std::string, scaler>
 	template<class saveTextIterator>
 	void saveElem(saveTextIterator begin, saveTextIterator end, const std::string& file_name, bool init=false)
 	{
@@ -77,10 +136,9 @@ namespace debug
 		
 		// check extension.
 		std::string SAVE_PATH;
-		std::string extension = file_name.substr(file_name.size()-4, file_name.size());
-		if (!(".csv" == extension || ".txt" == extension))
+		if (!(existExstension(file_name, ".csv") || existExstension(file_name, ".txt")))
 		{
-			SAVE_PATH = DIR_PATH + file_name + ".txt";
+			SAVE_PATH = DIR_PATH + file_name + ".csv";
 		}
 
 		std::ofstream write_file;
@@ -91,7 +149,7 @@ namespace debug
 			write_file.open(SAVE_PATH, std::ios_base::app);
 
 		std::ostringstream ss;
-		ss << "puyo" << std::setw(3) << std::setfill(' ') << save_color_elem_count << " -> ";
+		ss << std::setw(3) << std::setfill(' ') << save_color_elem_count << " -> ";
 
 		std::string str = "";
 		str += ss.str();

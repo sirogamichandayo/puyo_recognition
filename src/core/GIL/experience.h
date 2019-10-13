@@ -40,8 +40,8 @@ public:
 		// Warning.
 		auto end = exp_deque.end();
 		auto first = std::prev(end, size);
-		return std::accumulate(end, first,  
-	
+		// TODO: return sum of reward.
+		return 1.0;
 	}
 public:	
 	std::deque<E> exp_deque;

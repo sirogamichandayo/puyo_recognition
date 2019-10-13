@@ -77,13 +77,14 @@ public:
 		this->scr = scr_;
 		this->puyo_color_list.reserve(color::PUYO_COLOR_NUM);
 		this->player_resize = {
+			{player::DEFAULT, pic::normal},
 			{player::MOMOKEN, pic::momoken},
 			{player::HISYA, pic::hisya},
 			{player::KAMESTORY, pic::kamestry}
 		};
 				
 		// search key in player_resize
-		if (this->player_resize(this->player) == this->player_resize.end())
+		if (this->player_resize.find(this->player) == this->player_resize.end())
 		{
 			LOG("Not exist player.");
 			exit(1);
@@ -111,13 +112,13 @@ public:
 																				68, 69};
 		for (const auto &index : all_delete_indexes)
 		{
-			// make histgram.
+			// load teacher img.
 			const std::string FILE_PATH = DIR_PATH + "puyo" + std::to_string(index) + ".jpg";
 			cv::Mat img_all_delete = cv::imread(FILE_PATH, 1);
 			cv::cvtColor(img_all_delete, img_all_delete, cv::COLOR_BGR2HSV);
 			InfluenceImgAllDelete.insert(std::pair<int, cv::MatND>(index, img_all_delete));
 
-
+			// make histgram.
 			cv::MatND hist_all_delete;
 			img_p::img2Hist(img_all_delete, &hist_all_delete);
 			InfluenceHistAllDelete.insert(std::pair<int, cv::MatND>(index, hist_all_delete));
@@ -136,7 +137,7 @@ public:
 		if (img_.cols != pic::HD_WIDTH || img_.rows != pic::HD_HEIGHT) {
 			img_p::toHDImg(&img_);
 		}
-		if (this->player =! player::default)
+		if (this->player =! player::DEFAULT)
 			cutImg(&img_);
 		this->img = img_;
 	}

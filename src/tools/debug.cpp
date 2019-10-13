@@ -31,7 +31,7 @@ void debug::showForDebug(const cv::Mat &image, const unsigned int wait, const bo
 {
 	cv::Mat img_rgb;
 	if (is_hsv)
-	cv::cvtColor(image, img_rgb, CV_HSV2BGR);
+		cv::cvtColor(image, img_rgb, CV_HSV2BGR);
 	else 
 		img_rgb = image;
 	cv::imshow("debug", img_rgb);

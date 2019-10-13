@@ -5,7 +5,26 @@ namespace img_p =  image_processing;
 
 void img_p::paddingImg(const cv::Mat &img_, cv::Mat &img_pad, 
                 const float &x_rate, const float &y_rate, 
-								const float &w_rate, const float &h_rate);
+								const float &w_rate, const float &h_rate)
+{
+	if (x_rate + w_rate > 1.0 ||
+			y_rate + h_rate > 1.0)
+	{
+		LOG("Out of range");
+		std::exit(0);
+	}
+
+	int cols = img_.cols;
+	int rows = img_.rows;
+
+	int x = cols * x_rate;
+	int y = rows * y_rate;
+	int width = cols * w_rate;
+	int height = rows * h_rate;
+	cv::Rect rect = cv::Rect(x, y, width, height);
+
+	img_pad = img_(rect);
+}								
 
 void img_p::img2Hist(const cv::Mat &img_, cv::MatND *const hist_)
 {

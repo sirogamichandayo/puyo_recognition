@@ -10,11 +10,6 @@
 #include <string>
 #include <map>
 
-// <path, player>
-std::map<std::string, int> file_list = 
-{
-	{"/mnt/programming/data/MO/tokopuyo/test/test2.mp4", player::DEFAULT}
-};
 
 int main()
 {
@@ -23,41 +18,48 @@ int main()
 ツモを抽出
 ファイルに貯める。
 */
-
+	// timer set.
 	shared_ptr<stopWatchController> timer_con;
 	timer_con = make_shared<stopWatchController>();
-	std::string file_name = "./time.png";
+	std::string file_name = "./use_diff_hsv.png";
 	timer_con->set_file_name(file_name);
-	std::string title1 = "shot";
+	std::string title1 = "step";
 	std::string title2 = "is_exist";
+	std::string title3 = "get_all_puyo_1p";
 
-	unsigned const int SHOT = timer_con->new_timer(title1);
-	unsigned const int IS = timer_con->new_timer(title2);
+	unsigned const int STEP = timer_con->new_timer(title1);
+	unsigned const int IS_NEXT = timer_con->new_timer(title2);
+	unsigned const int GET_ALL = timer_con->new_timer(title3);
 
-	for (const auto &[path, player] : file_list)
+	using namespace game;
+	int all_puyo_size = BOARD_ROWS_NO_IN_1314 * BOARD_COLS +
+														NEXT1_ROWS * NEXT2_COLS + 
+														NEXT2_ROWS * NEXT2_COLS;
+	std::vector<int> all_puyo(all_puyo_size);
+	
+	ScreenShot scr = ScreenShot::getScreenShot("three");
+	cv::Mat img;
+	State env(&scr, player::DEFAULT);
+	for (int i = 0; i < 100; ++i)
 	{
-		int key = 0;
-		cv::VideoCapture cap(path);
-		cv::Mat img;
-		cv::Mat img_hsv;
-		State env(player);
-		for (int i = 0; i < 100; ++i)
-		{
-			// get 
-			timer_con->start(SHOT);
-			cap >> img;
-			if(img.empty())
-				break;
-			env.setImg(img);
-			timer_con->lap(SHOT);
-			/* wanna
-			env.step();
-			*/
-			timer_con->start(IS);
-			bool test = env.isGetState(get_mode::existNext_1p);
-			timer_con->lap(IS);
+		timer_con->start(STEP);
+		env.step();
+		timer_con->lap(STEP);
 
-			}
-		}
+		timer_con->start(IS_NEXT);
+		env.isGetState(get_mode::existNext_1p);
+		timer_con->lap(IS_NEXT);
+		
+		timer_con->start(GET_ALL);
+		env.getState(get_mode::allPuyo_1p, all_puyo);
+		timer_con->lap(GET_ALL);
+	}
+	env.bitNum2ColorNumForVec(&all_puyo);
+	std::vector<std::string> all_puyo_str(all_puyo_size);
+	env.colorNum2ColorStringForVec(all_puyo, &all_puyo_str);
+	int index = 0;
+	for (const auto &elem : all_puyo_str)
+	{
+		std::cout << index++ << " : "  << elem << std::endl;
 	}
 }
