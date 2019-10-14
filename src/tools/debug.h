@@ -23,6 +23,8 @@ namespace debug
 	
 	extern bool makeDir(const std::string& dir_name);
 
+	// std::map<std::string, std::Mat>
+	// std::string : file name.
 	template<class saveIterator>
 	void saveImg(saveIterator begin, saveIterator end, const std::string &dir_path, bool is_hsv=false) 
 	{

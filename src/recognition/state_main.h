@@ -92,11 +92,10 @@ public:
 
 		// make "X" histgram.
 		const std::string DIR_PATH = "../data/AllDelete_X/";
-		cv::Mat img_X = cv::imread(DIR_PATH+"puyo35.jpg", 1);
-		this->InfluenceImgX = \
-			std::make_pair(35, img_X);
+		cv::Mat img_X = cv::imread(DIR_PATH+"puyo35_.jpg", 1);
 
 		cv::cvtColor(img_X, img_X, cv::COLOR_BGR2HSV);
+		this->InfluenceImgX = std::make_pair(35, img_X);
 
 		cv::MatND hist_X;
 		img_p::img2Hist(img_X, &hist_X);

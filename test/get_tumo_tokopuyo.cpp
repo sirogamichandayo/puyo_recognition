@@ -21,8 +21,6 @@ int main()
 	// timer set.
 	shared_ptr<stopWatchController> timer_con;
 	timer_con = make_shared<stopWatchController>();
-	std::string file_name = "./use_diff_hsv.png";
-	timer_con->set_file_name(file_name);
 	std::string title1 = "step";
 	std::string title2 = "is_exist";
 	std::string title3 = "get_all_puyo_1p";
@@ -38,9 +36,8 @@ int main()
 	std::vector<int> all_puyo(all_puyo_size);
 	
 	ScreenShot scr = ScreenShot::getScreenShot("three");
-	cv::Mat img;
 	State env(&scr, player::DEFAULT);
-	for (int i = 0; i < 100; ++i)
+	for (int i = 0; i < 50; ++i)
 	{
 		timer_con->start(STEP);
 		env.step();

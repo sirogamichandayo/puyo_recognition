@@ -316,6 +316,33 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 		}
 	}
 
+	// DEBUG:
+	std::map<std::string, cv::Mat> for_judge_X_img_debug;
+	std::vector<int> for_judge_X_index = {0, 1, 12, 35};
+	for (const auto &index : for_judge_X_index)
+	{
+		std::map<std::string, int> for_judge_X_debug;
+		cv::Mat diff_X;
+		cv::absdiff(img_split_vec[index], InfluenceImgX.second, diff_X);
+		img_p::paddingImg(diff_X, diff_X, 0.15, 0.15, 0.7, 0.7);
+		auto pair = std::pair<std::string, cv::Mat>("puyo"+std::to_string(index), diff_X);
+		for_judge_X_img_debug.insert(pair);
+		cv::resize(diff_X, diff_X, cv::Size(), 0.1, 0.1);
+		for (int y = 0; y < diff_X.rows; ++y)
+		{
+			cv::Vec3b *p = &diff_X.at<cv::Vec3b>(y, 0);
+			for (int x = 0; x < diff_X.cols; ++x, ++p)
+			{
+				int v = static_cast<int>((*p)[2]);
+				++for_judge_X_debug[std::to_string((v/20)*20)];
+			}
+		}
+		debug::saveElem(for_judge_X_debug.begin(), for_judge_X_debug.end(), "judge_X_" + std::to_string(index));
+	}
+	debug::saveImg(for_judge_X_img_debug.begin(), for_judge_X_img_debug.end(), "judge_X_diff", true);
+	//
+	
+
 	// this code that to judge between "all delete" or not,
 	for (const auto &[index_AD, img_AD]: InfluenceImgAllDelete)		
 	{
@@ -337,7 +364,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 				cv::resize(diff, diff, cv::Size(), 0.1, 0.1);
 				int rows = diff.rows;
 				int cols = diff.cols;
-#pragma omp parallel for
+				#pragma omp parallel for
 				for (int y = 0; y < rows; ++y)
 				{
 					cv::Vec3b *p = &diff.at<cv::Vec3b>(y, 0);
@@ -417,9 +444,9 @@ bool State::isJudgeFightEnd()
 	cv::Mat resize_img;
 	cv::resize(resize_img, finish, cv::Size(), 0.1, 0.1);
 
-#pragma omp parallel for
 	int rows = resize_img.rows;
 	int cols = resize_img.cols;
+	#pragma omp parallel for
 	for (int y = 0; y < rows; ++y)
 	{
 		cv::Vec3b *p = &resize_img.at<cv::Vec3b>(y, 0);
@@ -458,7 +485,7 @@ void State::getResult(int *const result)
 	int count_red_2p = 0;
 	int other = 0;
 
-#pragma omp parallel for
+	#pragma omp parallel for
 	// 1p
 	cv::Mat end_1p(this->img, pic::result_1p);
 	cv::Mat resize_img;
@@ -490,7 +517,8 @@ void State::getResult(int *const result)
 		}
 	}
 // 2p
-#pragma omp parallel for
+// TODO: put together
+  #pragma omp parallel for
 	cv::Mat end_2p(img, pic::result_2p);
 	cv::resize(resize_img, end_2p, cv::Size(), 0.1, 0.1);
 	rows = resize_img.rows;
@@ -561,7 +589,7 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 
 	int rows = resize_image.rows;
 	int cols = resize_image.cols;
-#pragma omp parallel for
+  #pragma omp parallel for
 	for (int y = 0; y < rows; ++y)
 	{
 		cv::Vec3b *p = &resize_image.at<cv::Vec3b>(y, 0);
