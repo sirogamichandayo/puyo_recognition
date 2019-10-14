@@ -22,6 +22,7 @@ namespace debug
 	extern bool existExstension(const std::string& original, const std::string& extension);
 	
 	extern bool makeDir(const std::string& dir_name);
+	extern bool fileExists(const std::string& str);
 
 	// std::map<std::string, std::Mat>
 	// std::string : file name.

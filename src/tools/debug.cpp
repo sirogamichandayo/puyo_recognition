@@ -19,6 +19,12 @@ bool debug::makeDir(const std::string& dir_name)
 	return result;
 }
 
+inline bool debug::fileExists(const std::string& str)
+{
+	std::ifstream fs(str);
+	return fs.is_open();
+}
+
 void debug::showForDebug(const std::vector<cv::Mat> &img_vec, const unsigned int wait, const bool is_hsv)
 {
 	for (const auto& img_ : img_vec)
