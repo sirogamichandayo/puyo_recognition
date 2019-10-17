@@ -10,6 +10,11 @@ bool State::isGetState(const int &mode)
 	if (mode == get_mode::isFightEnd)
 	{
 		return isJudgeFightEnd();
+	} 
+
+	if (mode == get_mode::isClear)
+	{
+		return isJudgeClear();
 	}
 
 #if __cplusplus > 201703L
@@ -175,9 +180,6 @@ int State::colorNum2ForBitNum(const int &color)
 	else if (color == puyo_color_list[3])
 		return 0b111;
 
-	//  Logger
-	// Recognition miss.
-	LOG("Recognition miss");
 	return color::MISS;
 }
 
@@ -194,7 +196,6 @@ int State::bitNum2ColorNum(const int &color)
 	else if (color == 0b111)
 		return puyo_color_list[3];
 	
-	LOG("Change miss bit number to color number.");
 	return color::MISS;
 }
 
@@ -287,7 +288,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 	{
 		// Recognition adjustment of board.
 
-	// don't think about floating the color other than color::NONE.
+	// Delete floating puyo.
 	for (int i = 1; i < game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314; ++i)
 	{
 		if (i % game::BOARD_ROWS_NO_IN_1314 == 0) continue;
@@ -316,6 +317,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 		}
 	}
 
+#if 0
 	// DEBUG:
 	std::map<std::string, cv::Mat> for_judge_X_img_debug;
 	std::vector<int> for_judge_X_index = {0, 1, 12, 35};
@@ -341,7 +343,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 	}
 	debug::saveImg(for_judge_X_img_debug.begin(), for_judge_X_img_debug.end(), "judge_X_diff", true);
 	//
-	
+#endif	
 
 	// this code that to judge between "all delete" or not,
 	for (const auto &[index_AD, img_AD]: InfluenceImgAllDelete)		
@@ -382,7 +384,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 		}
 	}
 
-	// don't think about floating the color other than color::NONE. (again)
+	// Delete floating puyo.(again)
 	for (int i = 1; i < game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314; ++i)
 	{
 		if (i % game::BOARD_ROWS_NO_IN_1314 == 0) continue;
@@ -441,15 +443,14 @@ bool State::isJudgeFightEnd()
 	int green = 0;
 	int other = 0;
 	cv::Mat finish(this->img, pic::finish);
-	cv::Mat resize_img;
-	cv::resize(resize_img, finish, cv::Size(), 0.1, 0.1);
+	cv::resize(finish, finish, cv::Size(), 0.1, 0.1);
 
-	int rows = resize_img.rows;
-	int cols = resize_img.cols;
+	int rows = finish.rows;
+	int cols = finish.cols;
 	#pragma omp parallel for
 	for (int y = 0; y < rows; ++y)
 	{
-		cv::Vec3b *p = &resize_img.at<cv::Vec3b>(y, 0);
+		cv::Vec3b *p = &finish.at<cv::Vec3b>(y, 0);
 		for (int x = 0; x < cols; ++x, ++p)
 		{
 			hsv((int)(*p)[0]*2, (int)(*p)[1], (int)(*p)[2]);
@@ -525,7 +526,7 @@ void State::getResult(int *const result)
 	cols = resize_img.cols;
 	for (int y = 0; y < rows; ++y)
 	{
-		cv::Vec3b *p = end_2p.ptr<cv::Vec3b>(y, 0);
+		cv::Vec3b *p = &end_2p.at<cv::Vec3b>(y, 0);
 		for (int x = 0; x < cols; ++x, ++p)
 		{
 			hsv((int)(*p)[0]*2, (int)(*p)[1], (int)(*p)[2]);
@@ -596,31 +597,42 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 		for (int x = 0; x < cols; ++x, ++p)
 		{
 			hsv((int)(*p)[0]*2, (int)(*p)[1], (int)(*p)[2]);
-
 			++color_pixel_dict[hsv.toGetPixelPuyoColor()];
 		}
 	}
 	if (is_exist_next)
+	{
 		color_pixel_dict[color::NONE]*=3.0;
+		color_pixel_dict[color::PURPLE]*=2.0;
+	}
 	
 	if (color_pixel_dict[color::DIST] >= 5)
 		color_pixel_dict[color::DIST]-=5;
 
-#if 0
+#if false
 	/////////////////////////////////////////////////
 	// DEBUG
 	// save element count of color of puyo color per piece.
+	std::string color_str;
 	std::map<std::string, int> color_picel_dict_for_debug;
 	for (const auto &[color_num, count] : color_pixel_dict)
 	{
-		std::string color_str;
 		colorNum2ColorString(color_num, &color_str);
 		color_picel_dict_for_debug.insert(std::pair<std::string, int>
 													(color_str, count));
 	}
+	color_str = "zH";
+	color_picel_dict_for_debug.insert(std::pair<std::string, int>
+													(color_str, hsv.h));
+	color_str = "zS";
+	color_picel_dict_for_debug.insert(std::pair<std::string, int>
+													(color_str, hsv.s));
+	color_str = "zV";
+	color_picel_dict_for_debug.insert(std::pair<std::string, int>
+													(color_str, hsv.v));
 	debug::saveElem(color_picel_dict_for_debug.begin(), color_picel_dict_for_debug.end(), "color_elem");
 	///////////////////////////////////////////
-#endif
+#endif	
 
 	std::pair<int, int> max_color = *std::max_element
 		(color_pixel_dict.begin(), color_pixel_dict.end(),
@@ -629,4 +641,38 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 		}
 	);
 	return max_color.first;
+}
+
+bool State::isJudgeClear()
+{
+	HSV hsv;
+	int count_orange = 0;
+	int count_other  = 0;
+
+	cv::Mat clear_img(this->img, pic::clear);
+	cv::resize(clear_img, clear_img, cv::Size(), 0.1, 0.1);
+	int rows = clear_img.rows;
+	int cols = clear_img.cols;
+	#pragma omp parallel for
+	for (int y = 0; y < rows; ++y)
+	{
+		cv::Vec3b *p = &clear_img.at<cv::Vec3b>(y, 0);
+		for (int x = 0; x < cols; ++x, ++p)
+		{
+			hsv((int)(*p)[0]*2, (int)(*p)[1], (int)(*p)[2]);
+
+			switch (hsv.toReadOrange())
+			{
+			case color::ORANGE:
+				++count_orange;
+				break;
+			case color::OTHER:
+				++count_other;
+				break;
+			}
+		}
+	}
+	if (1100 < count_orange)
+		return true;
+	return false;
 }

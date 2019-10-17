@@ -11,8 +11,6 @@ int HSV::toGetPixelPuyoColor()
 	
 	// HSV *hsv = new HSV();
 	// toHSV(rgb, hsv);
-	if (v < 100)
-		return color::NONE;
 
 	if (s < 50 && 120 < h)
 		return color::DIST;
@@ -56,5 +54,12 @@ int HSV::toReadGreenYellow()
 	if ((90 < h) && (h < 120) && v > 100)
 		return color::GREEN;
 
+	return color::OTHER;
+}
+
+int HSV::toReadOrange()
+{
+	if ((h < 50 || 330 < h))
+		return color::ORANGE;
 	return color::OTHER;
 }

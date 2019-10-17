@@ -11,12 +11,15 @@
 #include <iterator>
 #include <vector>
 #include <ostream>
-#include <sys/stat.h>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace debug
 {
 
-	const std::string DIR_PATH = "/mnt/programming/data/MO/tokopuyo/recognition_data8/";
+	const std::string DIR_PATH = "/mnt/programming/data/MO/tokopuyo/recognition_data10/";
+	extern void initializeDir();
 
 	// For debug and log
 	extern bool existExstension(const std::string& original, const std::string& extension);
@@ -29,7 +32,7 @@ namespace debug
 	template<class saveIterator>
 	void saveImg(saveIterator begin, saveIterator end, const std::string &dir_path, bool is_hsv=false) 
 	{
-		if (makeDir(dir_path)==-1)
+		if (makeDir(DIR_PATH + dir_path)==-1)
 			LOG("To make dir (name : \"" + dir_path + "\") failed.");
 
 		cv::Mat img;
@@ -48,7 +51,7 @@ namespace debug
 			std::string file_name = begin->first;
 			if (!(existExstension(file_name, ".jpg") || existExstension(file_name, ".png")))
 			{
-				file_name += ".jpg";
+				file_name += ".png";
 			}
 
 			std::string log_path_img;
@@ -60,7 +63,6 @@ namespace debug
 			{
 				log_path_img = DIR_PATH+dir_path+file_name;
 			}
-			
 			cv::imwrite(log_path_img, img);
 		}
 	}
@@ -68,12 +70,15 @@ namespace debug
 	extern void showForDebug(const std::vector<cv::Mat> &img_vec, const unsigned int wait, const bool is_hsv = false);
 	extern void showForDebug(const cv::Mat &image, const unsigned int wait, const bool is_hsv = false);
 
+
+	// if file exist overwrite,
+
 	// for csv.
 	// std::pair<std::vector<std::string>, std::vector<std::vector>>>
 	// std::vector<std::string> title.
 	// std::vector<std::vector> data.
 	template<class csvT>
-	void saveElem(const csvT& csv, const std::string& file_name, const bool overwrite = false)
+	void saveElem(const csvT& csv, const std::string& file_name)
 	{
 		int title_size = csv.first.size();
 		int data_cols_size = csv.second[0].size();
@@ -92,31 +97,24 @@ namespace debug
 			SAVE_PATH = DIR_PATH + file_name;
 		}
 		std::ofstream write_file;
+		std::string str = "";
 
-		if (overwrite)
-		{
+		if (fileExists(file_name))
 			write_file.open(SAVE_PATH, std::ios::trunc);
-		}
 		else
 		{
 			write_file.open(SAVE_PATH, std::ios_base::app);
-		}
-
-
-		std::string str = "";
-		// write title
-		if (overwrite)
-		{
 			for (int i = 0; i < title_size-1; ++i)
 			{
-				str += (csv.first[i] + ",");
+				str += csv.first[i] + ",";
 			}
-			str += (csv.first[title_size-1] + "\n");
+			str += csv.first[title_size-1] + "\n";
 		}
+
 
 		for (const auto &elem_vec : csv.second)
 		{
-			for (int i = 0; i < data_cols_size; ++i)
+			for (int i = 0; i < data_cols_size-1; ++i)
 			{
 				str += (std::to_string(elem_vec[i]) + ",");
 			}

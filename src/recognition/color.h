@@ -17,16 +17,15 @@ namespace color
 	unsigned const int GREEN = 7;
 	unsigned const int PURPLE = 8;			// purple
 	unsigned const int WHITE = 9;
-	unsigned const int OTHER = 10;
+	unsigned const int ORANGE = 10;    // judge clear or not.(for TA)
+	unsigned const int OTHER = 100000;
 	unsigned const int MISS = 9999999;
 	}; // namespace tumo
 
-class HSV
+struct HSV
 {
-private:	
 	int h, s, v;
 
-public:
 	void show_all() {
 		std::cout << "(h:" << h << ", s: " << s << ", v:" << v << ")" << std::endl;
 	}
@@ -40,6 +39,7 @@ public:
 	int toGetPixelPuyoColor();
 	int toReadBlueRed();
 	int toReadGreenYellow();
+	int toReadOrange();
 };
 
 #endif // COLOR_H

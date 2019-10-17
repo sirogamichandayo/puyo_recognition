@@ -21,6 +21,8 @@ int main()
 	// timer set.
 	shared_ptr<stopWatchController> timer_con;
 	timer_con = make_shared<stopWatchController>();
+	std::string file_name_time = "test_move.png";
+	timer_con->set_file_name(file_name_time);
 	std::string title1 = "step";
 	std::string title2 = "is_exist";
 	std::string title3 = "get_all_puyo_1p";
@@ -37,7 +39,8 @@ int main()
 	
 	ScreenShot scr = ScreenShot::getScreenShot("three");
 	State env(&scr, player::DEFAULT);
-	for (int i = 0; i < 50; ++i)
+	debug::initializeDir();
+	for (int i = 0; i < 100; ++i)
 	{
 		timer_con->start(STEP);
 		env.step();
@@ -51,6 +54,7 @@ int main()
 		env.getState(get_mode::allPuyo_1p, all_puyo);
 		timer_con->lap(GET_ALL);
 	}
+	timer_con->show(STEP);
 	env.bitNum2ColorNumForVec(&all_puyo);
 	std::vector<std::string> all_puyo_str(all_puyo_size);
 	env.colorNum2ColorStringForVec(all_puyo, &all_puyo_str);

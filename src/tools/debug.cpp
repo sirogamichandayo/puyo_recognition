@@ -9,20 +9,26 @@ bool debug::existExstension(const std::string& original, const std::string& exte
 	int exte_size = extension.size();
 	return original.substr(orig_size-exte_size, orig_size) == extension;
 }
-	
-bool debug::makeDir(const std::string& dir_name)
+
+void debug::initializeDir()
 {
-	char *path = new char[256];
-	strcpy(path, (debug::DIR_PATH + dir_name).c_str());
-	bool result = mkdir(path, S_IRWXU | S_IRWXG | S_IRWXO);
-	delete []path;
-	return result;
+	if (fs::exists(debug::DIR_PATH))
+	{
+		fs::remove_all(debug::DIR_PATH);
+	}
+
+	if (debug::makeDir(debug::DIR_PATH) == -1)
+		LOG("To make dir (name: \"" + debug::DIR_PATH + "\") failed.");
 }
 
-inline bool debug::fileExists(const std::string& str)
+bool debug::makeDir(const std::string& dir_name)
 {
-	std::ifstream fs(str);
-	return fs.is_open();
+	return fs::create_directory(dir_name);
+}
+
+bool debug::fileExists(const std::string& str)
+{
+	return fs::exists(str);
 }
 
 void debug::showForDebug(const std::vector<cv::Mat> &img_vec, const unsigned int wait, const bool is_hsv)

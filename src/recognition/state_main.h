@@ -55,6 +55,7 @@ unsigned const int allPuyo_1p = 2;
 unsigned const int allPuyo_2p = 3;
 unsigned const int isFightEnd = 4;
 unsigned const int battleResult = 5;
+unsigned const int isClear    = 6; 
 
 } // namespace get_mode
 
@@ -122,6 +123,12 @@ public:
 			img_p::img2Hist(img_all_delete, &hist_all_delete);
 			InfluenceHistAllDelete.insert(std::pair<int, cv::MatND>(index, hist_all_delete));
 		}
+
+		// The first 10 Screenshots are slow. (why)
+		for (int i = 0; i < 10; ++i)
+		{
+			step();
+		}
 	}
 
 	inline void step()
@@ -141,9 +148,11 @@ public:
 		this->img = img_;
 	}
 
-	inline void getImg(cv::Mat &img_)
+	inline cv::Mat getImg()
 	{
-		img_ = this->img;
+		cv::Mat rgb_img;
+		cv::cvtColor(this->img, rgb_img, cv::COLOR_HSV2BGR);
+		return rgb_img;
 	}
 
 
@@ -201,6 +210,7 @@ protected:
 	bool isExistNext_2p();
 	// Judge between enf of fight or not.
 	bool isJudgeFightEnd();
+	bool isJudgeClear(); // Judge clear or not(TA).
 	// Judge get result of fight.
 	void getResult(int *const result);		
 	int toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next=false);
