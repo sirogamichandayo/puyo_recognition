@@ -20,6 +20,7 @@ int main()
 	std::vector<int> all_puyo(all_puyo_size);
 	std::vector<std::string> all_puyo_vec(all_puyo_size);
 	ScreenShot scr = ScreenShot::getScreenShot("three");
+	debug::initializeDir();
 	cv::Mat img;
 	State env(&scr, player::DEFAULT);
 	for (int i = 0; i < 1; ++i)
