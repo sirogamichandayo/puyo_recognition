@@ -75,7 +75,7 @@ void State::getState(const int &mode, std::vector<int> &field, bool isColorNum)
 		std::vector<int> next2(game::NEXT2_COLS*game::NEXT2_ROWS);
 
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-										pic::board_1p, "board_1p");
+										pic::board_1p/*, "board_1p"*/);
 		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
 										pic::next_1p/*, "next1_1p"*/);
 		getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
