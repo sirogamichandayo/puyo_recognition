@@ -1,5 +1,10 @@
 #include "./debug.h"
 
+// existExstension("XXXX", ".AAA") : return false;
+// existExstension("XXXX.AAA", ".AAA") : return true;
+// TODO: solve error.
+// existExstension("XX", ".AAA") // error
+// if (orig_size < exte_size) error
 bool debug::existExstension(const std::string& original, const std::string& extension)
 {
 	if ('.' != extension[0] && "/" != extension)
@@ -9,6 +14,7 @@ bool debug::existExstension(const std::string& original, const std::string& exte
 	int exte_size = extension.size();
 	return original.substr(orig_size-exte_size, orig_size) == extension;
 }
+
 
 void debug::initializeDir()
 {

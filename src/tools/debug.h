@@ -18,7 +18,7 @@ namespace fs = std::filesystem;
 namespace debug
 {
 
-	const std::string DIR_PATH = "/mnt/programming/data/MO/tokopuyo/recognition_data10/";
+	const std::string DIR_PATH = "/mnt/programming/data/MO/tokopuyo/recognition_data11/";
 	extern void initializeDir();
 
 	// For debug and log
@@ -30,25 +30,25 @@ namespace debug
 	// std::map<std::string, std::Mat>
 	// std::string : file name.
 	template<class saveIterator>
-	void saveImg(saveIterator begin, saveIterator end, const std::string &dir_path, bool is_hsv=false) 
+	void saveImg(saveIterator begin_i, saveIterator end_i, const std::string &dir_path, bool is_hsv=false) 
 	{
 		if (makeDir(DIR_PATH + dir_path)==-1)
 			LOG("To make dir (name : \"" + dir_path + "\") failed.");
 
 		cv::Mat img;
-		for (;begin != end; ++begin)
+		for (;begin_i != end_i; ++begin_i)
 		{
 			if (is_hsv)
 			{
-				cv::cvtColor(begin->second, img, cv::COLOR_HSV2BGR);
+				cv::cvtColor(begin_i->second, img, cv::COLOR_HSV2BGR);
 			} 
 			else
 			{
-				img = begin->second;
+				img = begin_i->second;
 			}
 			
 			// check extension.
-			std::string file_name = begin->first;
+			std::string file_name = begin_i->first;
 			if (!(existExstension(file_name, ".jpg") || existExstension(file_name, ".png")))
 			{
 				file_name += ".png";
@@ -126,15 +126,8 @@ namespace debug
 	// for display.
 	// std::map<std::string, scaler>
 	template<class saveTextIterator>
-	void saveElem(saveTextIterator begin, saveTextIterator end, const std::string& file_name, bool init=false)
+	void saveElem(saveTextIterator begin_i, saveTextIterator end_i, const std::string& file_name, bool init=false)
 	{
-		static int save_color_elem_count = 0;
-		if (init)
-		{
-			save_color_elem_count = 0;
-			return;
-		}
-		
 		// check extension.
 		std::string SAVE_PATH;
 		if (!(existExstension(file_name, ".csv") || existExstension(file_name, ".txt")))
@@ -144,21 +137,17 @@ namespace debug
 
 		std::ofstream write_file;
 
-		if (!save_color_elem_count)
+		if (init)
 			write_file.open(SAVE_PATH, std::ios::trunc);
 		else
 			write_file.open(SAVE_PATH, std::ios_base::app);
 
-		std::ostringstream ss;
-		ss << std::setw(3) << std::setfill(' ') << save_color_elem_count << " -> ";
-
 		std::string str = "";
-		str += ss.str();
-		for (; begin != end; ++begin)
+		for (; begin_i != end_i; ++begin_i)
 		{
 			std::ostringstream ss_color, ss_num;
-			ss_color << begin->first << " : ";
-			ss_num << std::setw(3) << std::setfill('0') << begin->second;
+			ss_color << begin_i->first << " : ";
+			ss_num << std::setw(3) << std::setfill('0') << begin_i->second;
 
 			str += (ss_color.str() + ss_num.str() + ", ");
 		}
