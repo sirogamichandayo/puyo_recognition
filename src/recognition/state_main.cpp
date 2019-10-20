@@ -75,7 +75,7 @@ void State::getState(const int &mode, std::vector<int> &field, bool isColorNum)
 		std::vector<int> next2(game::NEXT2_COLS*game::NEXT2_ROWS);
 
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-										pic::board_1p/*, "board_1p"*/);
+										pic::board_1p, "board_1p");
 		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
 										pic::next_1p/*, "next1_1p"*/);
 		getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
@@ -299,51 +299,27 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 
 	// This code that to judge between "X" or not.
 	// "X" is top of the third row;
-	if ((*field)[InfluenceHistX.first] == colorNum2ForBitNum(color::RED))
+	if ((*field)[InfluenceImgX.first] == colorNum2ForBitNum(color::RED))
 	{
 		if (!isExistRedInColorList)
 		{
-			(*field)[InfluenceHistX.first] = color::NONE;
+			(*field)[InfluenceImgX.first] = color::NONE;
 		}
 		else
 		{
-			cv::MatND hist_X;
-			img_p::img2Hist(img_split_vec[InfluenceHistX.first], &hist_X);
-			double similar = cv::compareHist(hist_X, InfluenceHistX.second, 0);
-			if (similar > 0.3)
-			{
-				(*field)[InfluenceHistX.first] = color::NONE;
-			}
+			cv::Mat element(3, 3, CV_8U, cv::Scalar::all(255));
+			cv::Mat diff_X_FD;
+			cv::absdiff(img_split_vec[InfluenceImgX.first], InfluenceImgX.second, diff_X_FD);
+			cv::Mat hsv_channels[3];
+			cv::split(diff_X_FD, hsv_channels);
+			cv::threshold(hsv_channels[2], hsv_channels[2], 100, 255, cv::THRESH_BINARY);
+			img_p::paddingImg(hsv_channels[2], hsv_channels[2], 0.05, 0.05, 0.9, 0.9);
+			cv::morphologyEx(hsv_channels[2], hsv_channels[2], cv::MORPH_CLOSE, element, cv::Point(-1, -1), 3);
+			cv::resize(hsv_channels[2], hsv_channels[2], cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
+			if (50 < cv::countNonZero(hsv_channels[2]))
+				(*field)[InfluenceImgX.first] = color::NONE;
 		}
 	}
-
-#if 0
-	// DEBUG:
-	std::map<std::string, cv::Mat> for_judge_X_img_debug;
-	std::vector<int> for_judge_X_index = {0, 1, 12, 35};
-	for (const auto &index : for_judge_X_index)
-	{
-		std::map<std::string, int> for_judge_X_debug;
-		cv::Mat diff_X;
-		cv::absdiff(img_split_vec[index], InfluenceImgX.second, diff_X);
-		img_p::paddingImg(diff_X, diff_X, 0.15, 0.15, 0.7, 0.7);
-		auto pair = std::pair<std::string, cv::Mat>("puyo"+std::to_string(index), diff_X);
-		for_judge_X_img_debug.insert(pair);
-		cv::resize(diff_X, diff_X, cv::Size(), 0.1, 0.1);
-		for (int y = 0; y < diff_X.rows; ++y)
-		{
-			cv::Vec3b *p = &diff_X.at<cv::Vec3b>(y, 0);
-			for (int x = 0; x < diff_X.cols; ++x, ++p)
-			{
-				int v = static_cast<int>((*p)[2]);
-				++for_judge_X_debug[std::to_string((v/20)*20)];
-			}
-		}
-		debug::saveElem(for_judge_X_debug.begin(), for_judge_X_debug.end(), "judge_X_" + std::to_string(index));
-	}
-	debug::saveImg(for_judge_X_img_debug.begin(), for_judge_X_img_debug.end(), "judge_X_diff", true);
-	//
-#endif	
 
 	// this code that to judge between "all delete" or not,
 	for (const auto &[index_AD, img_AD]: InfluenceImgAllDelete)		
