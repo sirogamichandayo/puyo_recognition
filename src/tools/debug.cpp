@@ -1,7 +1,9 @@
 #include "./debug.h"
 
-// existExstension("XXXX", ".AAA") : return false;
-// existExstension("XXXX.AAA", ".AAA") : return true;
+// existExstension("XXXX", ".AAA") : return false.
+// existExstension("XXXX.AAA", ".AAA") : return true.
+// existExstension("XXXXB", "B") : return true. (not exstension)
+// Use B is "/(directory)".
 // TODO: solve error.
 // existExstension("XX", ".AAA") // error
 // if (orig_size < exte_size) error
