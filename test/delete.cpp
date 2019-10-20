@@ -13,16 +13,9 @@
 
 int main()
 {
-	ScreenShot scr = ScreenShot::getScreenShot("three");
-	State env(&scr, player::DEFAULT);
-	for (unsigned long int i = 0;;)
-	{
-		env.step();
-		if (!env.isGetState(get_mode::existNext_1p))
-		{
-			std::cout << ++i % 10 << std::endl;
-			usleep(300000);
-		}
-
-	}
+	cv::Mat img;
+	if (!cv::imwrite("/mnt/programming/data/MO/tokopuyo/recognition_data11/next_1p/next15.png", img))
+		std::cout << "a" << std::endl;
+	cv::imshow("test", img);
+	cv::waitKey(100000);
 }
