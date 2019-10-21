@@ -11,20 +11,38 @@
 #include <string>
 #include <map>
 
-int main()
+using namespace std;
+
+int main(int argc, char *argv[])
 {
+	assert(argc == 2);
+	debug::initializeDir(argv[1], true);
+
 	ScreenShot scr = ScreenShot::getScreenShot("three");
 	State env(&scr, player::DEFAULT);
 	std::map<std::string, cv::Mat> img_map;
-	debug::initializeDir();
-	for (int i = 0; i < 100; ++i)
+
+	int index = 0;
+	for (;;)
 	{
 		env.step();
-		env.isGetState(get_mode::existNext_1p);
-		cv::Mat next_1p(env.getImg(), pic::is_next_1p);
-		std::string title = "next" + std::to_string(i);
-		img_map.insert(std::pair<std::string, cv::Mat>(title, next_1p));
-		
+		if (!env.isGetState(get_mode::existNext_1p))
+		{
+			for (;;)
+			{
+				env.step();
+				if (env.isGetState(get_mode::existNext_1p))
+				{
+					usleep(1000);
+					env.step();
+					string title = "next" + to_string(index++);
+					img_map.insert(pair<string, cv::Mat>(title, env.getImg()));
+					usleep(300000);
+					break;
+				}
+			}
+		}
+		if (index == 10) break;
 	}
 	debug::saveImg(img_map.begin(), img_map.end(), "next_1p");
 }

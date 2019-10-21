@@ -10,9 +10,10 @@
 #include <vector>
 #include <string>
 
-int main()
+int main(int argc, char *argv[])
 {
-	int index = 0;
+	assert(argc == 2);
+
 	using namespace game;
 	int all_puyo_size = BOARD_ROWS_NO_IN_1314 * BOARD_COLS +
 														NEXT1_ROWS * NEXT2_COLS + 
@@ -20,9 +21,12 @@ int main()
 	std::vector<int> all_puyo(all_puyo_size);
 	std::vector<std::string> all_puyo_vec(all_puyo_size);
 	ScreenShot scr = ScreenShot::getScreenShot("three");
-	debug::initializeDir();
+
+	debug::initializeDir(argv[1], true);
+
 	cv::Mat img;
 	State env(&scr, player::DEFAULT);
+	int index = 0;
 	for (int i = 0; i < 1; ++i)
 	{
 		env.step();
