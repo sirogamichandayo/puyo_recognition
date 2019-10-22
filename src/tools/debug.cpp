@@ -1,5 +1,7 @@
 #include "./debug.h"
 
+std::string DEBUG_DIR_PATH = "/mnt/programming/data/MO/tokopuyo/";
+
 // existExstension("XXXX", ".AAA") : return false.
 // existExstension("XXXX.AAA", ".AAA") : return true.
 // existExstension("XXXXB", "B") : return true. (not exstension)
@@ -18,15 +20,20 @@ bool debug::existExstension(const std::string& original, const std::string& exte
 }
 
 
-void debug::initializeDir()
+void debug::initializeDir(const std::string& path, bool is_delete)
 {
-	if (fs::exists(debug::DIR_PATH))
+	if (!existExstension(path, "/"))
+		DEBUG_DIR_PATH += path + "/";
+	else
+		DEBUG_DIR_PATH += path;
+
+	if (fs::exists(DEBUG_DIR_PATH) && is_delete)
 	{
-		fs::remove_all(debug::DIR_PATH);
+		fs::remove_all(DEBUG_DIR_PATH);
 	}
 
-	if (debug::makeDir(debug::DIR_PATH) == -1)
-		LOG("To make dir (name: \"" + debug::DIR_PATH + "\") failed.");
+	if (debug::makeDir(DEBUG_DIR_PATH) == -1)
+		LOG("To make dir (name: \"" + DEBUG_DIR_PATH + "\") failed.");
 }
 
 bool debug::makeDir(const std::string& dir_name)

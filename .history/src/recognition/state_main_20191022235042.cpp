@@ -63,7 +63,6 @@ void State::getState(const int &mode, int &issue)
 
 void State::getState(const int &mode, std::vector<int> &field, bool isColorNum)
 {
-	// Can shorter?
 	if (mode == get_mode::allPuyo_1p)
 	{
 		int size =  game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314 +
@@ -146,7 +145,6 @@ void State::getState(const int &mode, std::vector<int> &field, bool isColorNum)
 		std::move(next1.begin(), next1.end(), begin);
 		std::move(next2.begin(), next2.end(), begin+=next1.size());
 	}	
-	// TODO: implement get_mode::nextPuyo_2p
 	else
 	{
 	////////////////////////////////////////

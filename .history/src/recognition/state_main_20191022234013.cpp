@@ -63,7 +63,6 @@ void State::getState(const int &mode, int &issue)
 
 void State::getState(const int &mode, std::vector<int> &field, bool isColorNum)
 {
-	// Can shorter?
 	if (mode == get_mode::allPuyo_1p)
 	{
 		int size =  game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314 +
@@ -117,36 +116,10 @@ void State::getState(const int &mode, std::vector<int> &field, bool isColorNum)
 		int size = game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314;
 		initializeField(&size, &field);
 	
-		std::vector<int> board(size);
+		std::vector<int> board(game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314);
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
 										pic::board_1p);
 	}
-	else if (mode == get_mode::boardPuyo2p)
-	{
-		int size = game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314;
-		initializeField(&size, &field);
-
-		std::vector<int> board(size);
-		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-										pic::board_2p);
-	}
-	else if (mode == get_mode::nextPuyo_1p)
-	{
-		int size = game::NEXT1_COLS * game::NEXT1_ROWS +
-							 game::NEXT2_COLS * game::NEXT1_ROWS;
-		initializeField(&size, &field);
-
-		std::vector<int> next1(game::NEXT1_COLS * game::NEXT1_ROWS);
-		std::vector<int> next2(game::NEXT2_COLS * game::NEXT2_ROWS);
-		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
-										pic::next_1p);
-		getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
-										pic::next2_1p);
-		auto begin = field->begin();
-		std::move(next1.begin(), next1.end(), begin);
-		std::move(next2.begin(), next2.end(), begin+=next1.size());
-	}	
-	// TODO: implement get_mode::nextPuyo_2p
 	else
 	{
 	////////////////////////////////////////

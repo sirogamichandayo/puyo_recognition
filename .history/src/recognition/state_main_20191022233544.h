@@ -32,7 +32,7 @@ namespace game
 {
 unsigned const int BOARD_COLS = 6;
 unsigned const int BOARD_ROWS_NO_IN_1314 = 12;
-unsigned const int BOARD_ROWS_IN_1314 = 14;
+unsigned const int board_rows_IN_1314 = 14;
 unsigned const int NEXT1_COLS = 1;
 unsigned const int NEXT1_ROWS = 2;
 unsigned const int NEXT2_COLS = 1;
@@ -49,17 +49,17 @@ unsigned const int KAMESTORY = 2;
 
 namespace get_mode
 {
-unsigned const int existNext_1p   = 0;
-unsigned const int existNext_2p   = 1;
-unsigned const int allPuyo_1p     = 2;
-unsigned const int allPuyo_2p     = 3;
-unsigned const int boardPuyo_1p   = 4;
-unsigned const int boardPuyo_2p   = 5;
-unsigned const int nextPuyo_1p    = 6;
-unsigned const int nextPuyo_2p    = 7;
-unsigned const int isFightEnd     = 8;
-unsigned const int battleResult   = 9;
-unsigned const int isClear        = 10; 
+unsigned const int existNext_1p = 0;
+unsigned const int existNext_2p = 1;
+unsigned const int allPuyo_1p = 2;
+unsigned const int allPuyo_2p = 3;
+unsigned const int fieldPuyo_1p = 4;
+unsigned const int fieldPuyo_2p = 5;
+unsigned const int nextAllPuyo_1p = 6;
+unsigned const int nextAllPuyo_2p = 7;
+unsigned const int isFightEnd = 8;
+unsigned const int battleResult = 9;
+unsigned const int isClear    = 10; 
 
 } // namespace get_mode
 

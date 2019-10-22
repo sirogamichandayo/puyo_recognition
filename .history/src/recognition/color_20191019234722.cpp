@@ -8,7 +8,9 @@ int HSV::toGetPixelPuyoColor()
 */
 	if ((195 < h && h < 205) && (190 < s && s < 217) && (200 < v))
 		return color::NONE;
-
+	
+	// HSV *hsv = new HSV();
+	// toHSV(rgb, hsv);
 	if (v < 100)
 		return color::NONE;
 

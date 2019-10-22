@@ -14,11 +14,12 @@
 #include <filesystem>
 
 namespace fs = std::filesystem;
-extern std::string DEBUG_DIR_PATH; // in debug.cpp
 
 namespace debug
 {
-	extern void initializeDir(const std::string& path, bool is_delete=false);
+
+	const std::string DIR_PATH = "/mnt/programming/data/MO/tokopuyo/recognition_data10/";
+	extern void initializeDir();
 
 	// For debug and log
 	extern bool existExstension(const std::string& original, const std::string& extension);
@@ -29,38 +30,38 @@ namespace debug
 	// std::map<std::string, std::Mat>
 	// std::string : file name.
 	template<class saveIterator>
-	void saveImg(saveIterator begin_i, saveIterator end_i, const std::string &dir_path, bool is_hsv=false) 
+	void saveImg(saveIterator begin, saveIterator end, const std::string &dir_path, bool is_hsv=false) 
 	{
-		if (makeDir(DEBUG_DIR_PATH + dir_path)==-1)
+		if (makeDir(DIR_PATH + dir_path)==-1)
 			LOG("To make dir (name : \"" + dir_path + "\") failed.");
 
 		cv::Mat img;
-		for (;begin_i != end_i; ++begin_i)
+		for (;begin != end; ++begin)
 		{
 			if (is_hsv)
 			{
-				cv::cvtColor(begin_i->second, img, cv::COLOR_HSV2BGR);
+				cv::cvtColor(begin->second, img, cv::COLOR_HSV2BGR);
 			} 
 			else
 			{
-				img = begin_i->second;
+				img = begin->second;
 			}
 			
 			// check extension.
-			std::string file_name = begin_i->first;
+			std::string file_name = begin->first;
 			if (!(existExstension(file_name, ".jpg") || existExstension(file_name, ".png")))
 			{
-				file_name += ".png";
+				file_name += ".jpg";
 			}
 
 			std::string log_path_img;
 			if (!(existExstension(dir_path, "/")))
 			{
-				log_path_img = DEBUG_DIR_PATH+dir_path+"/"+file_name;
+				log_path_img = DIR_PATH+dir_path+"/"+file_name;
 			}
 			else
 			{
-				log_path_img = DEBUG_DIR_PATH+dir_path+file_name;
+				log_path_img = DIR_PATH+dir_path+file_name;
 			}
 			cv::imwrite(log_path_img, img);
 		}
@@ -86,23 +87,23 @@ namespace debug
 			LOG("Size is different. Not saved.");
 		}
 
-		std::string save_path;
+		std::string SAVE_PATH;
 		if (!(existExstension(file_name, ".txt") || existExstension(file_name, ".csv")))
 		{
-			save_path = DEBUG_DIR_PATH + file_name + ".csv";
+			SAVE_PATH = DIR_PATH + file_name + ".csv";
 		} 
 		else
 		{
-			save_path = DEBUG_DIR_PATH + file_name;
+			SAVE_PATH = DIR_PATH + file_name;
 		}
 		std::ofstream write_file;
 		std::string str = "";
 
 		if (fileExists(file_name))
-			write_file.open(save_path, std::ios::trunc);
+			write_file.open(SAVE_PATH, std::ios::trunc);
 		else
 		{
-			write_file.open(save_path, std::ios_base::app);
+			write_file.open(SAVE_PATH, std::ios_base::app);
 			for (int i = 0; i < title_size-1; ++i)
 			{
 				str += csv.first[i] + ",";
@@ -125,33 +126,43 @@ namespace debug
 	// for display.
 	// std::map<std::string, scaler>
 	template<class saveTextIterator>
-	void saveElem(saveTextIterator begin_i, saveTextIterator end_i, const std::string& file_name, bool init=false)
+	void saveElem(saveTextIterator begin, saveTextIterator end, const std::string& file_name, bool init=false)
 	{
+		static int save_color_elem_count = 0;
+		if (init)
+		{
+			save_color_elem_count = 0;
+			return;
+		}
+		
 		// check extension.
-		std::string save_path;
+		std::string SAVE_PATH;
 		if (!(existExstension(file_name, ".csv") || existExstension(file_name, ".txt")))
 		{
-			save_path = DEBUG_DIR_PATH + file_name + ".csv";
+			SAVE_PATH = DIR_PATH + file_name + ".csv";
 		}
 
 		std::ofstream write_file;
 
-		if (init)
-			write_file.open(save_path, std::ios::trunc);
+		if (!save_color_elem_count)
+			write_file.open(SAVE_PATH, std::ios::trunc);
 		else
-			write_file.open(save_path, std::ios_base::app);
+			write_file.open(SAVE_PATH, std::ios_base::app);
+
+		std::ostringstream ss;
 
 		std::string str = "";
-		for (; begin_i != end_i; ++begin_i)
+		for (; begin != end; ++begin)
 		{
 			std::ostringstream ss_color, ss_num;
-			ss_color << begin_i->first << " : ";
-			ss_num << std::setw(3) << std::setfill('0') << begin_i->second;
+			ss_color << begin->first << " : ";
+			ss_num << std::setw(3) << std::setfill('0') << begin->second;
 
 			str += (ss_color.str() + ss_num.str() + ", ");
 		}
 		str += '\n';
 		write_file << str;
+		++save_color_elem_count;
 	}
 };
 
