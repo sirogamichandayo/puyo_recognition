@@ -23,7 +23,7 @@ get_tumo_mp4: $(SRC_REC)color.cpp $(SRC_REC)state_main.cpp get_tumo_tokopuyo.cpp
 	$(CC) -o $(FILE) $(VER) $(OP) $(SRC_REC)color.cpp $(SRC_REC)state_main.cpp $(SRC_REC)image_processing.cpp $(FILE).cpp $(OPENCV) -lX11
 
 get_tumo_screen: $(SRC_REC)color.cpp $(SRC_REC)state_main.cpp get_tumo_tokopuyo1.cpp
-	$(CC) -o $(FILE) $(VER) $(OP) $(SRC_REC)color.cpp $(SRC_REC)state_main.cpp $(SRC_REC)image_processing.cpp $(TOOL)debug.cpp $(FILE).cpp $(OPENCV) -lX11 -lstdc++fs $(ADD) 
+	$(CC) -o $(FILE) $(VER) $(OP) $(SRC_REC)color.cpp $(SRC_REC)state_main.cpp $(SRC_REC)image_processing.cpp $(TOOL)debug.cpp $(FILE).cpp $(OPENCV) -lX11 -lstdc++fs $(ADD) $(PARALLEL)
 
 clean:
 	$(RM) *.o
