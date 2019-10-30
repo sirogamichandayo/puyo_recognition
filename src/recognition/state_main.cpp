@@ -76,11 +76,11 @@ void State::getState(const int &mode, std::vector<int> &field, bool isColorNum)
 
 		// getPuyoColorSet(XXX, XXX, XXX, XXX, debug direcotory name);
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-										pic::board_1p/*, "board_1p"*/);
+										pic::board_1p, "board_1p");
 		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
-										pic::next_1p/*, "next1_1p"*/);
+										pic::next_1p, "next1_1p");
 		getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
-										pic::next2_1p/*, "next2_1p"*/);
+										pic::next2_1p, "next2_1p");
 
 		auto begin = field.begin();
 		std::move(board.begin(), board.end(), begin);
@@ -185,7 +185,7 @@ void State::colorNum2bitNumForVec(std::vector<int> *const field)
 	}
 	for (auto elem : *field)
 	{
-		elem = colorNum2ForBitNum(elem);
+		elem = colorNum2BitNum(elem);
 	}
 }
 
@@ -202,7 +202,7 @@ void State::colorNum2ColorStringForVec(const std::vector<int> &field_int,
 /* private */
 ////////////////////////////////////////////////////////////////////////
 
-int State::colorNum2ForBitNum(const int &color)
+int State::colorNum2BitNum(const int &color)
 {
 	/*
 		 Puyo real color has no measning.
@@ -312,10 +312,8 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 	for (int i = 0; i < size; ++i)
 		(*field)[i] = getColor(img_split_vec[i]);
 
-	if (size != game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314)
-		return;
-
-	complementPuyoColorSet(field, img_split_vec, size);
+	if (size == game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314)
+		complementPuyoColorSet(field, img_split_vec, size);
 }	
 
 void State::complementPuyoColorSet(std::vector<int> *const field, 
@@ -334,64 +332,56 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 	}
 
 	// This code that to judge between "X" or not.
-	// "X" is top of the third row;
-	if ((*field)[InfluenceImgX.first] == colorNum2ForBitNum(color::RED))
+	// "X" is top of the third row.
+	// "35" represent location of "X".
+	const int x_place = 35;
+	const int red_bit_num = colorNum2BitNum(color::RED);
+	if ((*field)[x_place] == red_bit_num)
 	{
 		if (!isExistRedInColorList)
 		{
-			(*field)[InfluenceImgX.first] = color::NONE;
+			(*field)[x_place] = color::NONE;
 		}
 		else
 		{
 			cv::Mat element(3, 3, CV_8U, cv::Scalar::all(255));
 			cv::Mat diff_X_FD;
-			cv::absdiff(img_split_vec[InfluenceImgX.first], InfluenceImgX.second, diff_X_FD);
+			cv::absdiff(img_split_vec[x_place], redPuyo, diff_X_FD);
 			cv::Mat hsv_channels[3];
 			cv::split(diff_X_FD, hsv_channels);
 			cv::threshold(hsv_channels[2], hsv_channels[2], 100, 255, cv::THRESH_BINARY);
 			img_p::paddingImg(hsv_channels[2], hsv_channels[2], 0.05, 0.05, 0.9, 0.9);
+			// opening.
 			cv::morphologyEx(hsv_channels[2], hsv_channels[2], cv::MORPH_CLOSE, element, cv::Point(-1, -1), 3);
 			cv::resize(hsv_channels[2], hsv_channels[2], cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
 			if (50 < cv::countNonZero(hsv_channels[2]))
-				(*field)[InfluenceImgX.first] = color::NONE;
+				(*field)[x_place] = color::NONE;
 		}
 	}
-
-	// this code that to judge between "all delete" or not,
-	for (const auto &[index_AD, img_AD]: InfluenceImgAllDelete)		
+		
+	// for all delete or not, and chain effect or not.
+	const int yellow_bit_num = colorNum2BitNum(color::YELLOW);
+	for (int i = 0; i < field->size(); ++i)
 	{
-			
-		if ((*field)[index_AD] == colorNum2ForBitNum(color::YELLOW))
+		
+		if ((*field)[i] == yellow_bit_num)
 		{
 			if (!isExistYellowInColorList)
-			{
-				(*field)[index_AD] = color::NONE;
-			}
+				(*field)[i] = color::NONE;
 			else
 			{
-				// use different between origina imgage and teacher image.
-				// TODO: test
-				// grayscale, edge extraction.
-				std::map<int, int> for_judge_AD;
+				cv::Mat element(3, 3, CV_8U, cv::Scalar::all(255));
 				cv::Mat diff;
-				cv::absdiff(img_split_vec[index_AD], img_AD, diff);
-				cv::resize(diff, diff, cv::Size(), 0.1, 0.1);
-				int rows = diff.rows;
-				int cols = diff.cols;
-				#pragma omp parallel for
-				for (int y = 0; y < rows; ++y)
-				{
-					cv::Vec3b *p = &diff.at<cv::Vec3b>(y, 0);
-					for (int x = 0; x < cols; ++x, ++p)
-					{
-						int v = static_cast<int>((*p)[2]);
-						++for_judge_AD[(v/40)*40];
-					}
-				}
-				if (for_judge_AD[0] > 30)
-				{
-					(*field)[index_AD] = color::NONE;
-				}
+				cv::absdiff(img_split_vec[i], yellowPuyo, diff);
+				cv::Mat hsv_channels[3];
+				cv::split(diff, hsv_channels);
+				cv::threshold(hsv_channels[2], hsv_channels[2], 100, 255, cv::THRESH_BINARY);
+				img_p::paddingImg(hsv_channels[2], hsv_channels[2], 0.05, 0.05, 0.9, 0.9);
+				// opening.
+				cv::morphologyEx(hsv_channels[2], hsv_channels[2], cv::MORPH_CLOSE, element, cv::Point(-1, -1), 3);
+				cv::resize(hsv_channels[2], hsv_channels[2], cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
+				if (50 < cv::countNonZero(hsv_channels[2]))
+					(*field)[i] = color::NONE;
 			}
 		}
 	}
@@ -432,7 +422,7 @@ int State::getColor(const cv::Mat &img)
 				isExistYellowInColorList = true;
 		}
 	}
-	return colorNum2ForBitNum(color);
+	return colorNum2BitNum(color);
 }
 
 bool State::isExistNext_1p()
