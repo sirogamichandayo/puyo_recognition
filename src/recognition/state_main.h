@@ -94,38 +94,8 @@ public:
 			exit(1);
 		}
 
-		// make "X" histgram.
-		const std::string DIR_PATH = "../data/AllDelete_X/";
-		cv::Mat img_X = cv::imread(DIR_PATH+"puyo35_.jpg", 1);
-
-		cv::cvtColor(img_X, img_X, cv::COLOR_BGR2HSV);
-		this->InfluenceImgX = std::make_pair(35, img_X);
-
-		cv::MatND hist_X;
-		img_p::img2Hist(img_X, &hist_X);
-		this->InfluenceHistX = \
-			std::make_pair(35, hist_X);
-		
-		// make "All Delete" histgram.
-		std::vector<int> all_delete_indexes{8, 9, 10,
-																				20, 21, 22,
-																				32, 33, 34,
-																				44, 45, 46,
-																				56, 57, 58,
-																				68, 69};
-		for (const auto &index : all_delete_indexes)
-		{
-			// load teacher img.
-			const std::string FILE_PATH = DIR_PATH + "puyo" + std::to_string(index) + ".jpg";
-			cv::Mat img_all_delete = cv::imread(FILE_PATH, 1);
-			cv::cvtColor(img_all_delete, img_all_delete, cv::COLOR_BGR2HSV);
-			InfluenceImgAllDelete.insert(std::pair<int, cv::MatND>(index, img_all_delete));
-
-			// make histgram.
-			cv::MatND hist_all_delete;
-			img_p::img2Hist(img_all_delete, &hist_all_delete);
-			InfluenceHistAllDelete.insert(std::pair<int, cv::MatND>(index, hist_all_delete));
-		}
+		this->redPuyo    = cv::imread("../data/puyoImg/red.jpg");
+		this->yellowPuyo = cv::imread("../data/puyoImg/yellow.jpg");
 
 		// The first 10 Screenshots are slow. (why)
 		for (int i = 0; i < 10; ++i)
@@ -191,12 +161,10 @@ protected:
 	cv::Mat img;
 	std::vector<int> puyo_color_list;
 	bool initColorList;
-	bool isExistRedInColorList; // for "X"
-	bool isExistYellowInColorList; // for all delete in other words zenkesi.
-	std::map<int, cv::MatND> InfluenceHistAllDelete; // Plan to delete.
-	std::map<int, cv::Mat>   InfluenceImgAllDelete;
-	std::pair<int, cv::MatND> InfluenceHistX; // Plan to delete.
-	std::pair<int, cv::Mat>   InfluenceImgX;
+	bool isExistRedInColorList;           // for "X"
+	bool isExistYellowInColorList;        // for all delete.
+	cv::Mat redPuyo;                      // for "X"
+	cv::Mat yellowPuyo;                   // for all delete and chain effect
 	ScreenShot *scr;
 
 
@@ -211,7 +179,7 @@ protected:
 	}
 
 
-	int colorNum2ForBitNum(const int& color);
+	int colorNum2BitNum(const int& color);
 	int bitNum2ColorNum(const int& color);
 	void colorNum2ColorString(const int& color, std::string *const str);
 	int getColor(const cv::Mat &img);
