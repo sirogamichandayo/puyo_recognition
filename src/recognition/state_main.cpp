@@ -427,14 +427,34 @@ int State::getColor(const cv::Mat &img)
 
 bool State::isExistNext_1p()
 {
-	cv::Mat is_next_img_1p(this->img, pic::is_next_1p);
-	return (color::NONE != toGetPuyoColorPerPiece(is_next_img_1p, true));
+	cv::Mat is_next_img(this->img, pic::is_next_1p);
+	cv::Mat hsv_channels[3];
+	cv::split(is_next_img, hsv_channels);
+	cv::Mat gray = hsv_channels[2];
+	/*
+	cv::Canny(hsv_channels[2], hsv_channels[2], 100, 200);
+	cv::bitwise_not(hsv_channels[2], hsv_channels[2]);
+	*/
+	std::vector<cv::Vec3f> circles;
+	HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 1, 40, 10, 30, /*minRadius*/20);
+	for( size_t i = 0; i < circles.size(); i++ )
+  {
+      cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+      int radius = cvRound(circles[i][2]);
+      // circle center
+      cv::circle( gray, center, 3, cv::Scalar(0,255,0), -1, 8, 0 );
+      // circle outline
+      cv::circle( gray, center, radius, cv::Scalar(0,0,255), 3);
+  }
+	
+	debug::showForDebug(gray, 1);
+	return true;
 }
 
 bool State::isExistNext_2p()
 {
 	cv::Mat is_next_img_2p(this->img, pic::is_next_2p);
-	return (color::NONE != toGetPuyoColorPerPiece(is_next_img_2p, true));
+	return true;
 }
 
 // Judge between fight or not.
