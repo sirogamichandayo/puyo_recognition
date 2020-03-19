@@ -37,11 +37,11 @@ namespace pic
 	const cv::Rect is_next_2p_rect = next1_2p_rect;
 	// board_and_next_2p;
 
-	const cv::Rect momoken = cv::Rect(0, 0, 1608, 905);
-	// const cv::vector<int> delta()
-	const cv::Rect hisya = cv::Rect(18, 104, 1570, 883);
-	const cv::Rect kamestry = cv::Rect(4, 3, 1746, 984);
-	const cv::Rect normal = cv::Rect(0, 0, 1920, 1080);
+	// const cv::Rect momoken = cv::Rect(0, 0, 1608, 905);
+	// // const cv::vector<int> delta()
+	// const cv::Rect hisya = cv::Rect(18, 104, 1570, 883);
+	// const cv::Rect kamestry = cv::Rect(4, 3, 1746, 984);
+	// const cv::Rect normal = cv::Rect(0, 0, 1920, 1080);
 
 }; // namespace pic
 
