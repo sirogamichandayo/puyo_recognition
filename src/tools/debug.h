@@ -6,6 +6,7 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui.hpp"
 
+
 #include <string>
 #include <map>
 #include <iterator>
@@ -13,8 +14,9 @@
 #include <ostream>
 #include <filesystem>
 
-namespace fs = std::filesystem;
 extern std::string DEBUG_DIR_PATH; // in debug.cpp
+using namespace std;
+namespace fs = std::filesystem;
 
 namespace debug
 {
@@ -32,7 +34,7 @@ namespace debug
 	template<class saveIterator>
 	void saveImg(saveIterator begin_i, saveIterator end_i, const std::string &dir_path, bool is_hsv=false) 
 	{
-		if (makeDir(DEBUG_DIR_PATH + dir_path)==-1)
+		if (makeDir(DEBUG_DIR_PATH + dir_path) == -1)
 			LOG("To make dir (name : \"" + dir_path + "\") failed.");
 
 		cv::Mat img;
@@ -144,6 +146,6 @@ namespace debug
 		str += '\n';
 		write_file << str;
 	}
-};
+}
 
 #endif 

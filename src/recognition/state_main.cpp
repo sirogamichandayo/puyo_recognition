@@ -49,7 +49,7 @@ bool State::isGetState(const int &mode)
 
 void State::getState(const int &mode, int &issue)
 {
-	// 勝敗条件
+	// is win
 	if (mode == get_mode::battleResult)
 	{
 		getResult(&issue);
@@ -61,14 +61,15 @@ void State::getState(const int &mode, int &issue)
 	std::exit(0);
 }
 
-void State::getState(const int &mode, std::vector<int> &field, bool isColorNum)
+void State::getState(const int &mode, std::vector<int> *const field, bool isColorNum)
 {
 	// Can shorter?
 	if (mode == get_mode::allPuyo_1p)
 	{
-		int size =  game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314 +
-								game::NEXT1_COLS * game::NEXT1_ROWS +
-								game::NEXT2_COLS * game::NEXT2_ROWS;
+		size_t size =  game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314 +
+			game::NEXT1_COLS * game::NEXT1_ROWS +
+			game::NEXT2_COLS * game::NEXT2_ROWS;
+		assert(field->size() == size);
 
 		std::vector<int> board(game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314);
 		std::vector<int> next1(game::NEXT1_COLS*game::NEXT1_ROWS);
@@ -78,11 +79,11 @@ void State::getState(const int &mode, std::vector<int> &field, bool isColorNum)
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
 										pic::board_1p, "board_1p");
 		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
-										pic::next_1p, "next1_1p");
+										pic::next1_1p, "next1_1p");
 		getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
 										pic::next2_1p, "next2_1p");
 
-		auto begin = field.begin();
+		auto begin = field->begin();
 		std::move(board.begin(), board.end(), begin);
 		std::move(next1.begin(), next1.end(), begin+=board.size());
 		std::move(next2.begin(), next2.end(), begin+=next1.size());
@@ -90,77 +91,87 @@ void State::getState(const int &mode, std::vector<int> &field, bool isColorNum)
 	}
 	else if (mode == get_mode::allPuyo_2p)
 	{
-	  int size =  game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314 +
-								game::NEXT1_COLS * game::NEXT1_ROWS +
-								game::NEXT2_COLS * game::NEXT2_ROWS;
-		initializeField(&size, &field);
+	  size_t size =  game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314 +
+		  game::NEXT1_COLS * game::NEXT1_ROWS +
+		  game::NEXT2_COLS * game::NEXT2_ROWS;
+	  assert(field->size() == size);
 		
-		std::vector<int> board(game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314);
-		std::vector<int> next1(game::NEXT1_COLS*game::NEXT2_ROWS);
-		std::vector<int> next2(game::NEXT2_COLS*game::NEXT2_ROWS);
-		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-										pic::board_2p);
-		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
-										pic::next_2p);
-		getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
-									  pic::next2_2p);
+	  std::vector<int> board(game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314);
+	  std::vector<int> next1(game::NEXT1_COLS*game::NEXT2_ROWS);
+	  std::vector<int> next2(game::NEXT2_COLS*game::NEXT2_ROWS);
+	  getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
+					  pic::board_2p);
+	  getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
+					  pic::next1_2p);
+	  getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
+					  pic::next2_2p);
 		
-		auto begin = field.begin();
-		std::move(board.begin(), board.end(), begin);
-		std::move(next1.begin(), next1.end(), begin+=board.size());
-		std::move(next2.begin(), next2.end(), begin+=next1.size());
+	  auto begin = field->begin();
+	  std::move(board.begin(), board.end(), begin);
+	  std::move(next1.begin(), next1.end(), begin+=board.size());
+	  std::move(next2.begin(), next2.end(), begin+=next1.size());
 
 	}
 	else if (mode == get_mode::boardPuyo_1p)
 	{
-		int size = game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314;
-		initializeField(&size, &field);
+		size_t size = game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314;
+		assert(field->size() == size);
 	
 		std::vector<int> board(size);
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-										pic::board_1p);
+						pic::board_1p);
 
-		auto begin = field.begin();
+		auto begin = field->begin();
 		std::move(board.begin(), board.end(), begin);
 	}
 	else if (mode == get_mode::boardPuyo_2p)
 	{
-		int size = game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314;
-		initializeField(&size, &field);
+		size_t size = game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314;
+		assert(field->size() == size);
 
 		std::vector<int> board(size);
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-										pic::board_2p);
+						pic::board_2p);
 
-    auto begin = field.begin();
+		auto begin = field->begin();
 		std::move(board.begin(), board.end(), begin);
 	}
 	else if (mode == get_mode::nextPuyo_1p)
 	{
-		int size = game::NEXT1_COLS * game::NEXT1_ROWS +
-							 game::NEXT2_COLS * game::NEXT1_ROWS;
-		initializeField(&size, &field);
+		size_t size = game::NEXT1_COLS * game::NEXT1_ROWS +
+			game::NEXT2_COLS * game::NEXT1_ROWS;
+		assert(field->size() == size);
 
 		std::vector<int> next1(game::NEXT1_COLS * game::NEXT1_ROWS);
 		std::vector<int> next2(game::NEXT2_COLS * game::NEXT2_ROWS);
 		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
-										pic::next_1p);
+										pic::next1_1p);
 		getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
 										pic::next2_1p);
-		auto begin = field.begin();
+		auto begin = field->begin();
 		std::move(next1.begin(), next1.end(), begin);
 		std::move(next2.begin(), next2.end(), begin+=next1.size());
-	}	
-	// TODO: implement get_mode::nextPuyo_2p
+	}
+	else if (mode == get_mode::nextPuyo_2p)
+	{
+		size_t size = game::NEXT2_COLS * game::NEXT2_COLS +
+			game::NEXT2_COLS + game::NEXT1_ROWS;
+		assert(field->size() == size);
+
+		std::vector<int> next1(game::NEXT1_COLS * game::NEXT1_ROWS);
+		std::vector<int> next2(game::NEXT2_COLS * game::NEXT2_ROWS);
+		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS, pic::next1_1p);
+		getPuyoColorSet(&next1, game::NEXT2_COLS, game::NEXT2_ROWS, pic::next2_1p);
+	}
 	else
 	{
-	////////////////////////////////////////
-	LOG("No exist mode.");
-	std::exit(0);
+		////////////////////////////////////////
+		LOG("No exist mode.");
+		return;
 	}
 
 	if (isColorNum)
-		bitNum2ColorNumForVec(&field);
+		bitNum2ColorNumForVec(field);
 }
 
 void State::bitNum2ColorNumForVec(std::vector<int> *const field)
@@ -190,11 +201,11 @@ void State::colorNum2bitNumForVec(std::vector<int> *const field)
 }
 
 void State::colorNum2ColorStringForVec(const std::vector<int> &field_int, 
-																	std::vector<std::string> *const field_str)
+									   std::vector<std::string> *const field_str)
 {
-	int size = field_int.size();
-	initializeField(&size, field_str);
-	for (int i = 0; i < size; ++i)
+	size_t size = field_int.size();
+	assert(field_str->size() == size);
+	for (size_t i = 0; i < size; ++i)
 		colorNum2ColorString(field_int[i], &((*field_str)[i]));
 }
 
@@ -310,20 +321,20 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 	}
 
 	for (int i = 0; i < size; ++i)
-		(*field)[i] = getColor(img_split_vec[i]);
+		(*field)[i] = getColorNumber(img_split_vec[i]);
 
 	if (size == game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314)
 		complementPuyoColorSet(field, img_split_vec, size);
-}	
+}
 
+
+// Recognition adjustment of board.
 void State::complementPuyoColorSet(std::vector<int> *const field, 
-																		const std::vector<cv::Mat> &img_split_vec, 
-																		const int &size)
-	{
-		// Recognition adjustment of board.
-
+								   const std::vector<cv::Mat> &img_split_vec, 
+								   const int &size)
+{
 	// Delete floating puyo.
-	for (int i = 1; i < game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314; ++i)
+	for (size_t i = 1; i < game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314; ++i)
 	{
 		if (i % game::BOARD_ROWS_NO_IN_1314 == 0) continue;
 			
@@ -350,7 +361,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 			cv::Mat hsv_channels[3];
 			cv::split(diff_X_FD, hsv_channels);
 			cv::threshold(hsv_channels[2], hsv_channels[2], 100, 255, cv::THRESH_BINARY);
-			img_p::paddingImg(hsv_channels[2], hsv_channels[2], 0.05, 0.05, 0.9, 0.9);
+			img_p::imgAroundCutRate(hsv_channels[2], &hsv_channels[2], 0.05, 0.05, 0.9, 0.9);
 			// opening.
 			cv::morphologyEx(hsv_channels[2], hsv_channels[2], cv::MORPH_CLOSE, element, cv::Point(-1, -1), 3);
 			cv::resize(hsv_channels[2], hsv_channels[2], cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
@@ -361,7 +372,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 		
 	// for all delete or not, and chain effect or not.
 	const int yellow_bit_num = colorNum2BitNum(color::YELLOW);
-	for (int i = 0; i < field->size(); ++i)
+	for (size_t i = 0; i < field->size(); ++i)
 	{
 		
 		if ((*field)[i] == yellow_bit_num)
@@ -376,7 +387,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 				cv::Mat hsv_channels[3];
 				cv::split(diff, hsv_channels);
 				cv::threshold(hsv_channels[2], hsv_channels[2], 100, 255, cv::THRESH_BINARY);
-				img_p::paddingImg(hsv_channels[2], hsv_channels[2], 0.05, 0.05, 0.9, 0.9);
+				img_p::imgAroundCutRate(hsv_channels[2], &hsv_channels[2], 0.05, 0.05, 0.9, 0.9);
 				// opening.
 				cv::morphologyEx(hsv_channels[2], hsv_channels[2], cv::MORPH_CLOSE, element, cv::Point(-1, -1), 3);
 				cv::resize(hsv_channels[2], hsv_channels[2], cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
@@ -387,7 +398,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 	}
 
 	// Delete floating puyo.(again)
-	for (int i = 1; i < game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314; ++i)
+	for (size_t i = 1; i < game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314; ++i)
 	{
 		if (i % game::BOARD_ROWS_NO_IN_1314 == 0) continue;
 			
@@ -398,7 +409,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 	}
 
 
-int State::getColor(const cv::Mat &img)
+int State::getColorNumber(const cv::Mat &img)
 {
 	int color = toGetPuyoColorPerPiece(img);
 
@@ -590,9 +601,9 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 	cv::Mat image_padding;
 	// for exist next
 	if (is_exist_next)
-		img_p::paddingImg(image, image_padding, 0.1, 0.35, 0.8, 0.65);
+		img_p::imgAroundCutRate(image, &image_padding, 0.1, 0.35, 0.8, 0.65);
 	else
-		img_p::paddingImg(image, image_padding, 0.1, 0.1, 0.8, 0.8);
+		img_p::imgAroundCutRate(image, &image_padding, 0.1, 0.1, 0.8, 0.8);
 	
 	// Receive image(piece puyo), and judge puyo color
 	float size = 0.1;
