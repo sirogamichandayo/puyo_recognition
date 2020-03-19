@@ -21,21 +21,20 @@ namespace pic
 	const int SMALL_PUYO_WIDTH = 50;
 	const int SMALL_PUYO_HEIGHT = 46;
 
-	const std::vector<std::string> monitor = {"one", "three"};
-	const cv::Rect result_1p = cv::Rect(280, 400, 350, 70); // Win, Lose, Draw
-	const cv::Rect result_2p = cv::Rect(1256, 400, 350, 70);
-	const cv::Rect fight_1p = cv::Rect(620, 950, 100, 52); // is fighting.
-	const cv::Rect fight_2p = cv::Rect(1190, 950, 100, 52);
-	const cv::Rect finish = cv::Rect(475, 420, 950, 220); // is finish of fight.
-	const cv::Rect clear  = finish;
-	const cv::Rect board_1p = cv::Rect(280, 160, 384, 720);
-	const cv::Rect board_2p = cv::Rect(1256, 160, 384, 720);
-	const cv::Rect next1_1p = cv::Rect(431, 0, pic::PUYO_WIDTH, pic::PUYO_HEIGHT * 2);
-	const cv::Rect next2_1p = cv::Rect(765, 129, pic::SMALL_PUYO_WIDTH, pic::SMALL_PUYO_HEIGHT * 2);
-	const cv::Rect next1_2p = cv::Rect(837, 0, pic::PUYO_WIDTH, pic::PUYO_HEIGHT * 2);
-	const cv::Rect next2_2p = cv::Rect(799, 129, pic::SMALL_PUYO_WIDTH, pic::SMALL_PUYO_HEIGHT * 2);
-	const cv::Rect is_next_1p = next1_1p;
-	const cv::Rect is_next_2p = next1_2p;
+	const cv::Rect result_1p_rect = cv::Rect(280, 400, 350, 70); // Win, Lose, Draw
+	const cv::Rect result_2p_rect = cv::Rect(1256, 400, 350, 70);
+	const cv::Rect fight_1p_rect = cv::Rect(620, 950, 100, 52); // is fighting.
+	const cv::Rect fight_2p_rect = cv::Rect(1190, 950, 100, 52);
+	const cv::Rect finish_rect = cv::Rect(475, 420, 950, 220); // is finish of fight.
+	const cv::Rect clear_rect  = finish_rect;
+	const cv::Rect board_1p_rect = cv::Rect(280, 160, 384, 720);
+	const cv::Rect board_2p_rect = cv::Rect(1256, 160, 384, 720);
+	const cv::Rect next1_1p_rect = cv::Rect(431, 0, pic::PUYO_WIDTH, pic::PUYO_HEIGHT * 2);
+	const cv::Rect next2_1p_rect = cv::Rect(765, 129, pic::SMALL_PUYO_WIDTH, pic::SMALL_PUYO_HEIGHT * 2);
+	const cv::Rect next1_2p_rect = cv::Rect(837, 0, pic::PUYO_WIDTH, pic::PUYO_HEIGHT * 2);
+	const cv::Rect next2_2p_rect = cv::Rect(799, 129, pic::SMALL_PUYO_WIDTH, pic::SMALL_PUYO_HEIGHT * 2);
+	const cv::Rect is_next_1p_rect = next1_1p_rect;
+	const cv::Rect is_next_2p_rect = next1_2p_rect;
 	// board_and_next_2p;
 
 	const cv::Rect momoken = cv::Rect(0, 0, 1608, 905);
@@ -46,44 +45,26 @@ namespace pic
 
 }; // namespace pic
 
+namespace screenShot
+{
+	const int X = 1374;
+	const int Y = 186;
+	const int WIDTH = 1330;
+	const int HEIGHT = 696;
+};
+
 class ScreenShot
 {
 public:
 	ScreenShot(int x, int y, int width, int height) : x(x),
-																										y(y),
-																										width(width),
-																										height(height)
+													  y(y),
+													  width(width),
+													  height(height)
 	{
 		display = XOpenDisplay(nullptr);
 		root = DefaultRootWindow(display);
 
 		init = true;
-	};
-
-	static ScreenShot getScreenShot(const std::string &str)
-	{
-		// find monitor setting from std::vector<string> pic::monitor
-		auto it = std::find(pic::monitor.begin(), pic::monitor.end(), str);
-		if (it == pic::monitor.end())
-		{
-			std::cout << "Could not be find monitor setting." << std::endl;
-			std::cout << "Please confirm command line argument or  " << std::endl;
-			std::cout << "<line 29> pic::vector<string> pic::monitor." << std::endl;
-		}
-		// 'it' points to the second element of the vector, 'index' is 1
-
-		if (str == pic::monitor[0])
-			return ScreenShot(0, 0, 1920, 1080);
-
-		if (str == pic::monitor[1])
-		{
-			return ScreenShot(1080, 0, 1920, 1080);
-		}
-
-		// Compiler says "control may reach end of non-void function."
-		// But there is no such pattern.
-		LOG("Not exist mode.");
-		std::exit(0);
 	};
 
 	void operator >> (cv::Mat &cvImg)

@@ -77,11 +77,11 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 
 		// getPuyoColorSet(XXX, XXX, XXX, XXX, debug direcotory name);
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-										pic::board_1p, "board_1p");
+						pic::board_1p_rect, "board_1p");
 		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
-										pic::next1_1p, "next1_1p");
+						pic::next1_1p_rect, "next1_1p");
 		getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
-										pic::next2_1p, "next2_1p");
+						pic::next2_1p_rect, "next2_1p");
 
 		auto begin = field->begin();
 		std::move(board.begin(), board.end(), begin);
@@ -100,11 +100,11 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 	  std::vector<int> next1(game::NEXT1_COLS*game::NEXT2_ROWS);
 	  std::vector<int> next2(game::NEXT2_COLS*game::NEXT2_ROWS);
 	  getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-					  pic::board_2p);
+					  pic::board_2p_rect);
 	  getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
-					  pic::next1_2p);
+					  pic::next1_2p_rect);
 	  getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
-					  pic::next2_2p);
+					  pic::next2_2p_rect);
 		
 	  auto begin = field->begin();
 	  std::move(board.begin(), board.end(), begin);
@@ -119,7 +119,7 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 	
 		std::vector<int> board(size);
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-						pic::board_1p);
+						pic::board_1p_rect);
 
 		auto begin = field->begin();
 		std::move(board.begin(), board.end(), begin);
@@ -131,7 +131,7 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 
 		std::vector<int> board(size);
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-						pic::board_2p);
+						pic::board_2p_rect);
 
 		auto begin = field->begin();
 		std::move(board.begin(), board.end(), begin);
@@ -145,9 +145,9 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 		std::vector<int> next1(game::NEXT1_COLS * game::NEXT1_ROWS);
 		std::vector<int> next2(game::NEXT2_COLS * game::NEXT2_ROWS);
 		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
-										pic::next1_1p);
+										pic::next1_1p_rect);
 		getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
-										pic::next2_1p);
+										pic::next2_1p_rect);
 		auto begin = field->begin();
 		std::move(next1.begin(), next1.end(), begin);
 		std::move(next2.begin(), next2.end(), begin+=next1.size());
@@ -160,8 +160,8 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 
 		std::vector<int> next1(game::NEXT1_COLS * game::NEXT1_ROWS);
 		std::vector<int> next2(game::NEXT2_COLS * game::NEXT2_ROWS);
-		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS, pic::next1_1p);
-		getPuyoColorSet(&next1, game::NEXT2_COLS, game::NEXT2_ROWS, pic::next2_1p);
+		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS, pic::next1_1p_rect);
+		getPuyoColorSet(&next1, game::NEXT2_COLS, game::NEXT2_ROWS, pic::next2_1p_rect);
 	}
 	else
 	{
@@ -294,12 +294,13 @@ void State::colorNum2ColorString(const int &color, std::string *const str)
 
 // memory waste.
 void State::getPuyoColorSet(std::vector<int> *const field, 
-												const int& cols, const int& rows,
-												const cv::Rect &target_rect,
-												const std::string &dir_path)
+							const int& cols, const int& rows,
+							const cv::Rect &target_rect,
+							const std::string &dir_path)
 {
-	int size = cols * rows;
-
+	size_t size = cols * rows;
+	assert(field->size() == size);
+	
 	cv::Mat img_(this->img, target_rect);
 	std::vector<cv::Mat> img_split_vec(size);
 
@@ -311,7 +312,7 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 		
 		// save puyo image per piece
 		std::map<std::string, cv::Mat> img_split_vec_for_debug;
-		for (int i = 0; i < size; ++i)
+		for (size_t i = 0; i < size; ++i)
 		{
 			std::string file_path_split = "puyo" + std::to_string(i); // for debug
 			img_split_vec_for_debug.insert(std::pair<std::string, cv::Mat>(file_path_split, img_split_vec[i]));
@@ -320,7 +321,7 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 		/////////////////////////////////
 	}
 
-	for (int i = 0; i < size; ++i)
+	for (size_t i = 0; i < size; ++i)
 		(*field)[i] = getColorNumber(img_split_vec[i]);
 
 	if (size == game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314)
@@ -438,7 +439,7 @@ int State::getColorNumber(const cv::Mat &img)
 
 bool State::isExistNext_1p()
 {
-	cv::Mat is_next_img(this->img, pic::is_next_1p);
+	cv::Mat is_next_img(this->img, pic::is_next_1p_rect);
 	cv::Mat hsv_channels[3];
 	cv::split(is_next_img, hsv_channels);
 	cv::Mat gray = hsv_channels[2];
@@ -464,7 +465,7 @@ bool State::isExistNext_1p()
 
 bool State::isExistNext_2p()
 {
-	cv::Mat is_next_img_2p(this->img, pic::is_next_2p);
+	cv::Mat is_next_img_2p(this->img, pic::is_next_2p_rect);
 	return true;
 }
 
@@ -475,7 +476,7 @@ bool State::isJudgeFightEnd()
 	int yellow = 0;
 	int green = 0;
 	int other = 0;
-	cv::Mat finish(this->img, pic::finish);
+	cv::Mat finish(this->img, pic::finish_rect);
 	cv::resize(finish, finish, cv::Size(), 0.1, 0.1);
 
 	int rows = finish.rows;
@@ -521,7 +522,7 @@ void State::getResult(int *const result)
 
 	#pragma omp parallel for
 	// 1p
-	cv::Mat end_1p(this->img, pic::result_1p);
+	cv::Mat end_1p(this->img, pic::result_1p_rect);
 	cv::Mat resize_img;
 	cv::resize(resize_img, end_1p, cv::Size(), 0.1, 0.1);
 	int rows = resize_img.rows;
@@ -553,7 +554,7 @@ void State::getResult(int *const result)
 // 2p
 // TODO: put together
   #pragma omp parallel for
-	cv::Mat end_2p(img, pic::result_2p);
+	cv::Mat end_2p(img, pic::result_2p_rect);
 	cv::resize(resize_img, end_2p, cv::Size(), 0.1, 0.1);
 	rows = resize_img.rows;
 	cols = resize_img.cols;
@@ -673,7 +674,7 @@ bool State::isJudgeClear()
 	int count_orange = 0;
 	int count_other  = 0;
 
-	cv::Mat clear_img(this->img, pic::clear);
+	cv::Mat clear_img(this->img, pic::clear_rect);
 	cv::resize(clear_img, clear_img, cv::Size(), 0.1, 0.1);
 	int rows = clear_img.rows;
 	int cols = clear_img.cols;
