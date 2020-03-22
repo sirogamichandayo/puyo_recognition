@@ -27,18 +27,17 @@ namespace pic
 	const cv::Rect fight_2p_rect = cv::Rect(1190, 950, 100, 52);
 	const cv::Rect finish_rect = cv::Rect(475, 420, 950, 220); // is finish of fight.
 	const cv::Rect clear_rect  = finish_rect;
-	const cv::Rect board_1p_rect = cv::Rect(280, 160, 384, 720);
-	const cv::Rect board_2p_rect = cv::Rect(1256, 160, 384, 720);
+	const cv::Rect board_1p_rect = cv::Rect(0, 0, 378, 696);
+	const cv::Rect board_2p_rect = cv::Rect(952, 0, 1330, 696);
 	const cv::Rect next1_1p_rect = cv::Rect(431, 0, pic::PUYO_WIDTH, pic::PUYO_HEIGHT * 2);
-	const cv::Rect next2_1p_rect = cv::Rect(765, 129, pic::SMALL_PUYO_WIDTH, pic::SMALL_PUYO_HEIGHT * 2);
+	const cv::Rect next2_1p_rect = cv::Rect(482, 129, pic::SMALL_PUYO_WIDTH, pic::SMALL_PUYO_HEIGHT * 2);
 	const cv::Rect next1_2p_rect = cv::Rect(837, 0, pic::PUYO_WIDTH, pic::PUYO_HEIGHT * 2);
 	const cv::Rect next2_2p_rect = cv::Rect(799, 129, pic::SMALL_PUYO_WIDTH, pic::SMALL_PUYO_HEIGHT * 2);
-	const cv::Rect is_next_1p_rect = next1_1p_rect;
-	const cv::Rect is_next_2p_rect = next1_2p_rect;
+	const cv::Rect is_next_1p_rect = cv::Rect(431, 0, pic::PUYO_WIDTH, pic::PUYO_HEIGHT);
+	const cv::Rect is_next_2p_rect = cv::Rect(837, 0, pic::PUYO_WIDTH, pic::PUYO_HEIGHT);
 	// board_and_next_2p;
 
 	// const cv::Rect momoken = cv::Rect(0, 0, 1608, 905);
-	// // const cv::vector<int> delta()
 	// const cv::Rect hisya = cv::Rect(18, 104, 1570, 883);
 	// const cv::Rect kamestry = cv::Rect(4, 3, 1746, 984);
 	// const cv::Rect normal = cv::Rect(0, 0, 1920, 1080);

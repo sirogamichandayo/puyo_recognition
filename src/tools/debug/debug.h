@@ -1,7 +1,7 @@
 #ifndef _DEBUG_H_
 #define _DEBUG_H_
 
-#include "../log/log.h"
+#include "../../log/log.h"
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui.hpp"

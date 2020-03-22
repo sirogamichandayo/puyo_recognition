@@ -5,7 +5,7 @@
 #include "./color.h"
 #include "./screen_shot.h"
 #include "./image_processing.h"
-#include "../tools/debug.h"
+#include "../tools/debug/debug.h"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
@@ -141,6 +141,7 @@ protected:
 	int colorNum2BitNum(const int& color);
 	int bitNum2ColorNum(const int& color);
 	void colorNum2ColorString(const int& color, std::string *const str);
+	
 	int getColorNumber(const cv::Mat &img);
 	void getPuyoColorSet(std::vector<int> *field, const int& col_num, const int& row_num, 
 									const cv::Rect &target_rect, const std::string &dir_path = "");

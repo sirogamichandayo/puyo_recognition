@@ -77,11 +77,11 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 
 		// getPuyoColorSet(XXX, XXX, XXX, XXX, debug direcotory name);
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-						pic::board_1p_rect, "board_1p");
+						pic::board_1p_rect /*,"board_1p"*/);
 		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
-						pic::next1_1p_rect, "next1_1p");
+						pic::next1_1p_rect/*, "next1_1p"*/);
 		getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
-						pic::next2_1p_rect, "next2_1p");
+						pic::next2_1p_rect/*, "next2_1p"*/);
 
 		auto begin = field->begin();
 		std::move(board.begin(), board.end(), begin);
@@ -449,18 +449,20 @@ bool State::isExistNext_1p()
 	*/
 	std::vector<cv::Vec3f> circles;
 	HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 1, 40, 10, 30, /*minRadius*/20);
+
+	// Display 
 	for( size_t i = 0; i < circles.size(); i++ )
-  {
-      cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-      int radius = cvRound(circles[i][2]);
-      // circle center
-      cv::circle( gray, center, 3, cv::Scalar(0,255,0), -1, 8, 0 );
-      // circle outline
-      cv::circle( gray, center, radius, cv::Scalar(0,0,255), 3);
-  }
-	
+	{
+		cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+		int radius = cvRound(circles[i][2]);
+		// circle center
+		cv::circle( gray, center, 3, cv::Scalar(0,255,0), -1, 8, 0 );
+		// circle outline
+		cv::circle( gray, center, radius, cv::Scalar(0,0,255), 3);
+	}
 	debug::showForDebug(gray, 1);
-	return true;
+
+	return (circles.size() == 0) ? false : true;
 }
 
 bool State::isExistNext_2p()
@@ -607,7 +609,7 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 		img_p::imgAroundCutRate(image, &image_padding, 0.1, 0.1, 0.8, 0.8);
 	
 	// Receive image(piece puyo), and judge puyo color
-	float size = 0.1;
+	float size = 1.0;
 	HSV hsv;
 
 	std::map<int, int>

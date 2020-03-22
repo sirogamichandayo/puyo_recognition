@@ -41,7 +41,7 @@ void img_p::img2Hist(const cv::Mat &img_, cv::MatND *const hist_output)
 
 	cv::calcHist(&img_, 1, channels, cv::Mat(), *hist_output, 2, 
 								histSize, ranges, true, false);
-	cv::normalize(*hist_output, *hist_, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
+	cv::normalize(*hist_output, *hist_output, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
 }
 
 void img_p::splitImage(const cv::Mat &image, 
