@@ -96,5 +96,4 @@ void debug::showForDebug(const cv::Mat &image, const unsigned int wait, const bo
 		img_rgb = image;
 	cv::imshow("debug", img_rgb);
 	cv::waitKey(wait);
-	cv::destroyWindow("debug");
 }

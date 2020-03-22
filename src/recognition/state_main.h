@@ -67,13 +67,13 @@ namespace judge
 class State
 {
 public:
-	State(ScreenShot *const scr_)
+	State(ScreenShot *const scr_, const std::vector<cv::Rect> *rect_vec)
+		: _scr(scr_), _pic_rect_list(rect_vec)
 	{
 		initialize();
-		this->scr = scr_;
-		this->puyo_color_list.reserve(color::PUYO_COLOR_NUM);
-		this->redPuyo    = cv::imread("../data/puyoImg/red.jpg");
-		this->yellowPuyo = cv::imread("../data/puyoImg/yellow.jpg");
+		_puyo_color_list.reserve(color::PUYO_COLOR_NUM);
+		_redPuyo    = cv::imread("../data/puyoImg/red.jpg");
+		_yellowPuyo = cv::imread("../data/puyoImg/yellow.jpg");
 
 		// The first 10 Screenshots are slow. (why)
 		for (int i = 0; i < 10; ++i)
@@ -82,17 +82,22 @@ public:
 		}
 	}
 
+	~State()
+	{
+		std::vector<int>().swap(_puyo_color_list);
+	}
+
 	inline void initialize()
 	{
-		isExistRedInColorList = false;
-		isExistYellowInColorList = false;
-		initColorList = false;
+		_isExistRedInColorList = false;
+		_isExistYellowInColorList = false;
+		_initColorList = false;
 	}
 
 	inline void step()
 	{
 		cv::Mat image;
-		(*scr) >> image;
+		(*_scr) >> image;
 		setImg(image);
 	}
 
@@ -100,21 +105,21 @@ public:
 		cv::Mat img, resize_img;
 		
 		cv::cvtColor(img_, img, CV_BGR2HSV);
-		this->img = img;
+		_img = img;
 		
 		cv::resize(img, resize_img, cv::Size(), 0.2, 0.2);
-		this->resize_img = resize_img;
+		_resize_img = resize_img;
 	}
 
 	inline void getImg(cv::Mat *const img_output, bool is_rgb = false)
 	{
 		if (is_rgb)
 		{
-			cv::cvtColor(this->img, *img_output, cv::COLOR_HSV2BGR);
+			cv::cvtColor(_img, *img_output, cv::COLOR_HSV2BGR);
 		}
 		else
 		{
-			*img_output = this->img.clone();
+			*img_output = _img.clone();
 		}
 	}
 
@@ -129,14 +134,15 @@ public:
 	void colorNum2ColorStringForVec(const std::vector<int> &field_int, std::vector<std::string> *const field_str);
 
 protected:	
-	cv::Mat img, resize_img;
-	std::vector<int> puyo_color_list;
-	bool initColorList;
-	bool isExistRedInColorList;           // for "X"
-	bool isExistYellowInColorList;        // for all delete.
-	cv::Mat redPuyo;                      // for "X"
-	cv::Mat yellowPuyo;                   // for all delete and chain effect
-	ScreenShot *scr;					
+	cv::Mat _img, _resize_img;
+	std::vector<int> _puyo_color_list;
+	bool _initColorList;
+	bool _isExistRedInColorList;           // for "X"
+	bool _isExistYellowInColorList;        // for all delete.
+	cv::Mat _redPuyo;                      // for "X"
+	cv::Mat _yellowPuyo;                   // for all delete and chain effect
+	ScreenShot *_scr;
+	const std::vector<cv::Rect> *_pic_rect_list;
 
 	int colorNum2BitNum(const int& color);
 	int bitNum2ColorNum(const int& color);

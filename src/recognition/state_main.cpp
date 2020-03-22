@@ -77,11 +77,11 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 
 		// getPuyoColorSet(XXX, XXX, XXX, XXX, debug direcotory name);
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-						pic::board_1p_rect /*,"board_1p"*/);
+						(*_pic_rect_list)[pic::BOARD_1P_RECT_I] /*,"board_1p"*/);
 		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
-						pic::next1_1p_rect/*, "next1_1p"*/);
+						(*_pic_rect_list)[pic::NEXT1_1P_RECT_I]/*, "next1_1p"*/);
 		getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
-						pic::next2_1p_rect/*, "next2_1p"*/);
+						(*_pic_rect_list)[pic::NEXT2_1P_RECT_I]/*, "next2_1p"*/);
 
 		auto begin = field->begin();
 		std::move(board.begin(), board.end(), begin);
@@ -100,11 +100,11 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 	  std::vector<int> next1(game::NEXT1_COLS*game::NEXT2_ROWS);
 	  std::vector<int> next2(game::NEXT2_COLS*game::NEXT2_ROWS);
 	  getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-					  pic::board_2p_rect);
+					  (*_pic_rect_list)[pic::BOARD_2P_RECT_I]);
 	  getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
-					  pic::next1_2p_rect);
+					  (*_pic_rect_list)[pic::NEXT1_2P_RECT_I]);
 	  getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
-					  pic::next2_2p_rect);
+					  (*_pic_rect_list)[pic::NEXT2_2P_RECT_I]);
 		
 	  auto begin = field->begin();
 	  std::move(board.begin(), board.end(), begin);
@@ -119,7 +119,7 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 	
 		std::vector<int> board(size);
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-						pic::board_1p_rect);
+						(*_pic_rect_list)[pic::BOARD_1P_RECT_I]);
 
 		auto begin = field->begin();
 		std::move(board.begin(), board.end(), begin);
@@ -131,7 +131,7 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 
 		std::vector<int> board(size);
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-						pic::board_2p_rect);
+						(*_pic_rect_list)[pic::BOARD_2P_RECT_I]);
 
 		auto begin = field->begin();
 		std::move(board.begin(), board.end(), begin);
@@ -145,9 +145,9 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 		std::vector<int> next1(game::NEXT1_COLS * game::NEXT1_ROWS);
 		std::vector<int> next2(game::NEXT2_COLS * game::NEXT2_ROWS);
 		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
-										pic::next1_1p_rect);
+						(*_pic_rect_list)[pic::NEXT1_1P_RECT_I]);
 		getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
-										pic::next2_1p_rect);
+						(*_pic_rect_list)[pic::NEXT2_1P_RECT_I]);
 		auto begin = field->begin();
 		std::move(next1.begin(), next1.end(), begin);
 		std::move(next2.begin(), next2.end(), begin+=next1.size());
@@ -160,8 +160,8 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 
 		std::vector<int> next1(game::NEXT1_COLS * game::NEXT1_ROWS);
 		std::vector<int> next2(game::NEXT2_COLS * game::NEXT2_ROWS);
-		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS, pic::next1_1p_rect);
-		getPuyoColorSet(&next1, game::NEXT2_COLS, game::NEXT2_ROWS, pic::next2_1p_rect);
+		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS, (*_pic_rect_list)[pic::NEXT1_2P_RECT_I]);
+		getPuyoColorSet(&next1, game::NEXT2_COLS, game::NEXT2_ROWS, (*_pic_rect_list)[pic::NEXT2_2P_RECT_I]);
 	}
 	else
 	{
@@ -176,7 +176,7 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 
 void State::bitNum2ColorNumForVec(std::vector<int> *const field)
 {
-	if (!initColorList)
+	if (!_initColorList)
 	{
 		LOG("Not initialized initColorList in State Class.");
 		return;
@@ -189,7 +189,7 @@ void State::bitNum2ColorNumForVec(std::vector<int> *const field)
 
 void State::colorNum2bitNumForVec(std::vector<int> *const field)
 {
-	if (!initColorList)
+	if (!_initColorList)
 	{
 		LOG("Not initialized initColorList in State Class.");
 		return;
@@ -221,13 +221,13 @@ int State::colorNum2BitNum(const int &color)
 		 */
 	if (color == color::NONE || color == color::DIST)
 		return color;
-	else if (color == puyo_color_list[0])
+	else if (color == _puyo_color_list[0])
 		return 0b100;
-	else if (color == puyo_color_list[1])
+	else if (color == _puyo_color_list[1])
 		return 0b101;
-	else if (color == puyo_color_list[2])
+	else if (color == _puyo_color_list[2])
 		return 0b110;
-	else if (color == puyo_color_list[3])
+	else if (color == _puyo_color_list[3])
 		return 0b111;
 
 	return color::MISS;
@@ -238,13 +238,13 @@ int State::bitNum2ColorNum(const int &color)
 	if (color == color::NONE || color == color::DIST)
 		return color;
 	else if (color == 0b100)
-		return puyo_color_list[0];
+		return _puyo_color_list[0];
 	else if (color == 0b101)
-		return puyo_color_list[1];
+		return _puyo_color_list[1];
 	else if (color == 0b110)
-		return puyo_color_list[2];
+		return _puyo_color_list[2];
 	else if (color == 0b111)
-		return puyo_color_list[3];
+		return _puyo_color_list[3];
 	
 	return color::MISS;
 }
@@ -301,7 +301,7 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 	size_t size = cols * rows;
 	assert(field->size() == size);
 	
-	cv::Mat img_(this->img, target_rect);
+	cv::Mat img_(_img, target_rect);
 	std::vector<cv::Mat> img_split_vec(size);
 
 	img_p::splitImage(img_, cols, rows, &img_split_vec);
@@ -350,7 +350,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 	const int red_bit_num = colorNum2BitNum(color::RED);
 	if ((*field)[x_place] == red_bit_num)
 	{
-		if (!isExistRedInColorList)
+		if (!_isExistRedInColorList)
 		{
 			(*field)[x_place] = color::NONE;
 		}
@@ -358,7 +358,7 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 		{
 			cv::Mat element(3, 3, CV_8U, cv::Scalar::all(255));
 			cv::Mat diff_X_FD;
-			cv::absdiff(img_split_vec[x_place], redPuyo, diff_X_FD);
+			cv::absdiff(img_split_vec[x_place], _redPuyo, diff_X_FD);
 			cv::Mat hsv_channels[3];
 			cv::split(diff_X_FD, hsv_channels);
 			cv::threshold(hsv_channels[2], hsv_channels[2], 100, 255, cv::THRESH_BINARY);
@@ -378,13 +378,13 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 		
 		if ((*field)[i] == yellow_bit_num)
 		{
-			if (!isExistYellowInColorList)
+			if (!_isExistYellowInColorList)
 				(*field)[i] = color::NONE;
 			else
 			{
 				cv::Mat element(3, 3, CV_8U, cv::Scalar::all(255));
 				cv::Mat diff;
-				cv::absdiff(img_split_vec[i], yellowPuyo, diff);
+				cv::absdiff(img_split_vec[i], _yellowPuyo, diff);
 				cv::Mat hsv_channels[3];
 				cv::split(diff, hsv_channels);
 				cv::threshold(hsv_channels[2], hsv_channels[2], 100, 255, cv::THRESH_BINARY);
@@ -418,20 +418,20 @@ int State::getColorNumber(const cv::Mat &img)
 	if (color == color::NONE || color == color::DIST)
 		return color;
 	
-	auto it = std::find(puyo_color_list.begin(), puyo_color_list.end(), color);
+	auto it = std::find(_puyo_color_list.begin(), _puyo_color_list.end(), color);
 	
-	if (!initColorList && it == puyo_color_list.end()) {
-		puyo_color_list.push_back(color);
+	if (!_initColorList && it == _puyo_color_list.end()) {
+		_puyo_color_list.push_back(color);
 
-		if (puyo_color_list.size() == color::PUYO_COLOR_NUM)
+		if (_puyo_color_list.size() == color::PUYO_COLOR_NUM)
 		{
-			initColorList = true;
-			auto it_red = std::find(puyo_color_list.begin(), puyo_color_list.end(), color::RED);
-			if (it_red != puyo_color_list.end())
-				isExistRedInColorList = true;
-			auto it_yellow = std::find(puyo_color_list.begin(), puyo_color_list.end(), color::YELLOW);
-			if (it_yellow != puyo_color_list.end())
-				isExistYellowInColorList = true;
+			_initColorList = true;
+			auto it_red = std::find(_puyo_color_list.begin(), _puyo_color_list.end(), color::RED);
+			if (it_red != _puyo_color_list.end())
+				_isExistRedInColorList = true;
+			auto it_yellow = std::find(_puyo_color_list.begin(), _puyo_color_list.end(), color::YELLOW);
+			if (it_yellow != _puyo_color_list.end())
+				_isExistYellowInColorList = true;
 		}
 	}
 	return colorNum2BitNum(color);
@@ -439,7 +439,7 @@ int State::getColorNumber(const cv::Mat &img)
 
 bool State::isExistNext_1p()
 {
-	cv::Mat is_next_img(this->img, pic::is_next_1p_rect);
+	cv::Mat is_next_img(_img, (*_pic_rect_list)[pic::IS_NEXT_1P_RECT_I]);
 	cv::Mat hsv_channels[3];
 	cv::split(is_next_img, hsv_channels);
 	cv::Mat gray = hsv_channels[2];
@@ -467,7 +467,7 @@ bool State::isExistNext_1p()
 
 bool State::isExistNext_2p()
 {
-	cv::Mat is_next_img_2p(this->img, pic::is_next_2p_rect);
+	cv::Mat is_next_img_2p(_img, (*_pic_rect_list)[pic::IS_NEXT_2P_RECT_I]);
 	return true;
 }
 
@@ -478,7 +478,7 @@ bool State::isJudgeFightEnd()
 	int yellow = 0;
 	int green = 0;
 	int other = 0;
-	cv::Mat finish(this->img, pic::finish_rect);
+	cv::Mat finish(_img, (*_pic_rect_list)[pic::FINISH_RECT_I]);
 	cv::resize(finish, finish, cv::Size(), 0.1, 0.1);
 
 	int rows = finish.rows;
@@ -524,7 +524,7 @@ void State::getResult(int *const result)
 
 	#pragma omp parallel for
 	// 1p
-	cv::Mat end_1p(this->img, pic::result_1p_rect);
+	cv::Mat end_1p(_img, (*_pic_rect_list)[pic::RESULT_1P_RECT_I]);
 	cv::Mat resize_img;
 	cv::resize(resize_img, end_1p, cv::Size(), 0.1, 0.1);
 	int rows = resize_img.rows;
@@ -556,7 +556,7 @@ void State::getResult(int *const result)
 // 2p
 // TODO: put together
   #pragma omp parallel for
-	cv::Mat end_2p(img, pic::result_2p_rect);
+	cv::Mat end_2p(_img, (*_pic_rect_list)[pic::RESULT_2P_RECT_I]);
 	cv::resize(resize_img, end_2p, cv::Size(), 0.1, 0.1);
 	rows = resize_img.rows;
 	cols = resize_img.cols;
@@ -676,7 +676,7 @@ bool State::isJudgeClear()
 	int count_orange = 0;
 	int count_other  = 0;
 
-	cv::Mat clear_img(this->img, pic::clear_rect);
+	cv::Mat clear_img(_img, (*_pic_rect_list)[pic::CLEAR_RECT_I]);
 	cv::resize(clear_img, clear_img, cv::Size(), 0.1, 0.1);
 	int rows = clear_img.rows;
 	int cols = clear_img.cols;
