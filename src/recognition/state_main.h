@@ -37,22 +37,26 @@ namespace game
 	unsigned const int NEXT1_ROWS = 2;
 	unsigned const int NEXT2_COLS = 1;
 	unsigned const int NEXT2_ROWS = 2;
+	unsigned const int ALL_PUYO_NUM =
+		game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314 +
+		game::NEXT1_COLS * game::NEXT1_ROWS +
+		game::NEXT2_COLS * game::NEXT2_ROWS;
 }
 
 
 namespace get_mode
 {
-	unsigned const int existNext_1p   = 0;
-	unsigned const int existNext_2p   = 1;
-	unsigned const int allPuyo_1p     = 2;
-	unsigned const int allPuyo_2p     = 3;
-	unsigned const int boardPuyo_1p   = 4;
-	unsigned const int boardPuyo_2p   = 5;
-	unsigned const int nextPuyo_1p    = 6;
-	unsigned const int nextPuyo_2p    = 7;
-	unsigned const int isFightEnd     = 8;
-	unsigned const int battleResult   = 9;
-	unsigned const int isClear        = 10; 
+	unsigned const int IS_EXIST_NEXT_1P   = 0;
+	unsigned const int IS_EXIST_NEXT_2P   = 1;
+	unsigned const int ALL_PUYO_1P        = 2;
+	unsigned const int ALL_PUYO_2P        = 3;
+	unsigned const int BOARD_PUYO_1P      = 4;
+	unsigned const int BOARD_PUYO_2P      = 5;
+	unsigned const int NEXT_PUYO_1P       = 6;
+	unsigned const int NEXT_PUYO_2P       = 7;
+	unsigned const int IS_FIGHT_END       = 8;
+	unsigned const int BATTLE_RESULT      = 9;
+	unsigned const int IS_CLEAR           = 10; 
 
 } // namespace get_mode
 
@@ -129,9 +133,14 @@ public:
 	// Mainly use to get field or next
 	void getState(const int &mode, std::vector<int> *const field, bool isColorNum=false);
 
-	void bitNum2ColorNumForVec(std::vector<int> *const field);
-	void colorNum2bitNumForVec(std::vector<int> *const field);
-	void colorNum2ColorStringForVec(const std::vector<int> &field_int, std::vector<std::string> *const field_str);
+	void bitNum2ColorNumForVec(const std::vector<int> &input_puyo_field, std::vector<int> *const output_puyo_field);
+	void bitNum2ColorNumForVec(std::vector<int> *const puyo_field);
+	
+	void colorNum2BitNumForVec(const std::vector<int> &input_puyo_field, std::vector<int> *const output_puyo_field);
+	void colorNum2BitNumForVec(std::vector<int> *const puyo_field);
+	
+	void bitNum2ColorStringForVec(const std::vector<int> &input_puyo_field, std::vector<std::string> *const outout_puyo_field);
+	void colorNum2ColorStringForVec(const std::vector<int> &input_puyo_field, std::vector<std::string> *const output_puyo_field);
 
 protected:	
 	cv::Mat _img, _resize_img;
@@ -144,9 +153,10 @@ protected:
 	ScreenShot *_scr;
 	const std::vector<cv::Rect> *_pic_rect_list;
 
-	int colorNum2BitNum(const int& color);
-	int bitNum2ColorNum(const int& color);
-	void colorNum2ColorString(const int& color, std::string *const str);
+	int colorNum2BitNum(const int& color_num);
+	int bitNum2ColorNum(const int& bit_num);
+	void colorNum2ColorString(const int& color_num, std::string *const str);
+	void bitNum2ColorString(const int& color_num, std::string *const str);
 	
 	int getColorNumber(const cv::Mat &img);
 	void getPuyoColorSet(std::vector<int> *field, const int& col_num, const int& row_num, 

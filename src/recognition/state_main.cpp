@@ -7,12 +7,12 @@
 
 bool State::isGetState(const int &mode)
 {
-	if (mode == get_mode::isFightEnd)
+	if (mode == get_mode::IS_FIGHT_END)
 	{
 		return isJudgeFightEnd();
 	} 
 
-	if (mode == get_mode::isClear)
+	if (mode == get_mode::IS_CLEAR)
 	{
 		return isJudgeClear();
 	}
@@ -30,12 +30,12 @@ bool State::isGetState(const int &mode)
 #endif
 
 #if __cplusplus <= 201703L
-	if (mode == get_mode::existNext_1p)
+	if (mode == get_mode::IS_EXIST_NEXT_1P)
 	{
 		return isExistNext_1p();
 	}
 
-	if (mode == get_mode::existNext_2p)
+	if (mode == get_mode::IS_EXIST_NEXT_1P)
 	{
 		return isExistNext_2p();
 	}
@@ -50,7 +50,7 @@ bool State::isGetState(const int &mode)
 void State::getState(const int &mode, int &issue)
 {
 	// is win
-	if (mode == get_mode::battleResult)
+	if (mode == get_mode::BATTLE_RESULT)
 	{
 		getResult(&issue);
 		return;
@@ -64,7 +64,7 @@ void State::getState(const int &mode, int &issue)
 void State::getState(const int &mode, std::vector<int> *const field, bool isColorNum)
 {
 	// Can shorter?
-	if (mode == get_mode::allPuyo_1p)
+	if (mode == get_mode::ALL_PUYO_1P)
 	{
 		size_t size =  game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314 +
 			game::NEXT1_COLS * game::NEXT1_ROWS +
@@ -89,7 +89,7 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 		std::move(next2.begin(), next2.end(), begin+=next1.size());
 
 	}
-	else if (mode == get_mode::allPuyo_2p)
+	else if (mode == get_mode::ALL_PUYO_2P)
 	{
 	  size_t size =  game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314 +
 		  game::NEXT1_COLS * game::NEXT1_ROWS +
@@ -112,7 +112,7 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 	  std::move(next2.begin(), next2.end(), begin+=next1.size());
 
 	}
-	else if (mode == get_mode::boardPuyo_1p)
+	else if (mode == get_mode::BOARD_PUYO_1P)
 	{
 		size_t size = game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314;
 		assert(field->size() == size);
@@ -124,7 +124,7 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 		auto begin = field->begin();
 		std::move(board.begin(), board.end(), begin);
 	}
-	else if (mode == get_mode::boardPuyo_2p)
+	else if (mode == get_mode::BOARD_PUYO_2P)
 	{
 		size_t size = game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314;
 		assert(field->size() == size);
@@ -136,7 +136,7 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 		auto begin = field->begin();
 		std::move(board.begin(), board.end(), begin);
 	}
-	else if (mode == get_mode::nextPuyo_1p)
+	else if (mode == get_mode::NEXT_PUYO_1P)
 	{
 		size_t size = game::NEXT1_COLS * game::NEXT1_ROWS +
 			game::NEXT2_COLS * game::NEXT1_ROWS;
@@ -152,7 +152,7 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 		std::move(next1.begin(), next1.end(), begin);
 		std::move(next2.begin(), next2.end(), begin+=next1.size());
 	}
-	else if (mode == get_mode::nextPuyo_2p)
+	else if (mode == get_mode::NEXT_PUYO_2P)
 	{
 		size_t size = game::NEXT2_COLS * game::NEXT2_COLS +
 			game::NEXT2_COLS + game::NEXT1_ROWS;
@@ -174,40 +174,113 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 		bitNum2ColorNumForVec(field);
 }
 
-void State::bitNum2ColorNumForVec(std::vector<int> *const field)
+void State::bitNum2ColorNumForVec(const std::vector<int> &input_puyo_field,
+								  std::vector<int> *const output_puyo_field)
+{
+	assert(input_puyo_field.size() == output_puyo_field->size());
+	if (!_initColorList)
+	{
+		LOG("Not initialized _initColorList in State Class.");
+		return;
+	}
+	auto input_begin = input_puyo_field.begin();
+	auto input_end   = input_puyo_field.end();
+	auto output_begin = output_puyo_field->begin();
+	auto output_end   = output_puyo_field->end();
+
+	for (; input_begin != input_end && output_begin != output_end; ++input_begin, ++output_begin)
+	{
+		*output_begin = bitNum2ColorNum(*input_begin);
+	}
+}
+
+void State::bitNum2ColorNumForVec(std::vector<int> *const puyo_field)
 {
 	if (!_initColorList)
 	{
 		LOG("Not initialized initColorList in State Class.");
 		return;
 	}
-	for (auto& elem : *field)
+	for (auto& elem : *puyo_field)
 	{
 		elem = bitNum2ColorNum(elem);
 	}
 }
 
-void State::colorNum2bitNumForVec(std::vector<int> *const field)
+void State::colorNum2BitNumForVec(const std::vector<int> &input_puyo_field,
+								  std::vector<int> *const output_puyo_field)
+{
+	assert(input_puyo_field.size() == output_puyo_field->size());
+	if (!_initColorList)
+	{
+		LOG("Not initialized _initColorList in State Class.");
+		return;
+	}
+	auto input_begin = input_puyo_field.begin();
+	auto input_end   = input_puyo_field.end();
+	auto output_begin = output_puyo_field->begin();
+	auto output_end   = output_puyo_field->end();
+
+	for (; input_begin != input_end && output_begin != output_end; ++input_begin, ++output_begin)
+	{
+		*output_begin = colorNum2BitNum(*input_begin);
+	}
+}
+
+
+void State::colorNum2BitNumForVec(std::vector<int> *const puyo_field)
 {
 	if (!_initColorList)
 	{
 		LOG("Not initialized initColorList in State Class.");
 		return;
 	}
-	for (auto elem : *field)
+	for (auto elem : *puyo_field)
 	{
 		elem = colorNum2BitNum(elem);
 	}
 }
 
-void State::colorNum2ColorStringForVec(const std::vector<int> &field_int, 
-									   std::vector<std::string> *const field_str)
+void State::bitNum2ColorStringForVec(const std::vector<int> &input_puyo_field,
+									 std::vector<std::string> *const output_puyo_field)
 {
-	size_t size = field_int.size();
-	assert(field_str->size() == size);
-	for (size_t i = 0; i < size; ++i)
-		colorNum2ColorString(field_int[i], &((*field_str)[i]));
+	assert(input_puyo_field.size() == output_puyo_field->size());
+	if (!_initColorList)
+	{
+		LOG("Not initialized _initColorList in State Class.");
+		return;
+	}
+	auto input_begin = input_puyo_field.begin();
+	auto input_end   = input_puyo_field.end();
+	auto output_begin = output_puyo_field->begin();
+	auto output_end   = output_puyo_field->end();
+
+	for (; input_begin != input_end && output_begin != output_end; ++input_begin, ++output_begin)
+	{
+		bitNum2ColorString(*input_begin, &(*output_begin));
+	}	
 }
+
+void State::colorNum2ColorStringForVec(const std::vector<int> &input_puyo_field, 
+									   std::vector<std::string> *const output_puyo_field)
+{
+	assert(input_puyo_field.size() == output_puyo_field->size());
+	if (!_initColorList)
+	{
+		LOG("Not initialized _initColorList in State Class.");
+		return;
+	}
+	auto input_begin = input_puyo_field.begin();
+	auto input_end   = input_puyo_field.end();
+	auto output_begin = output_puyo_field->begin();
+	auto output_end   = output_puyo_field->end();
+
+	for (; input_begin != input_end && output_begin != output_end; ++input_begin, ++output_begin)
+	{
+		colorNum2ColorString(*input_begin, &(*output_begin));
+	}		
+}
+
 
 ////////////////////////////////////////////////////////////////////////
 /* private */
@@ -216,9 +289,9 @@ void State::colorNum2ColorStringForVec(const std::vector<int> &field_int,
 int State::colorNum2BitNum(const int &color)
 {
 	/*
-		 Puyo real color has no measning.
-		 So change real color number to number for bit operatorn.
-		 */
+	  Puyo real color has no measning.
+	  So change real color number to number for bit operatorn.
+	*/
 	if (color == color::NONE || color == color::DIST)
 		return color;
 	else if (color == _puyo_color_list[0])
@@ -292,7 +365,13 @@ void State::colorNum2ColorString(const int &color, std::string *const str)
 	}
 }
 
-// memory waste.
+void State::bitNum2ColorString(const int& bit_num, std::string *const str)
+{
+	int color_num = bitNum2ColorNum(bit_num);
+	colorNum2ColorString(color_num, str);
+}
+
+
 void State::getPuyoColorSet(std::vector<int> *const field, 
 							const int& cols, const int& rows,
 							const cv::Rect &target_rect,
