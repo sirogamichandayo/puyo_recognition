@@ -421,7 +421,6 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 		if ((*field)[i-1] == color::NONE && (*field)[i] != color::NONE)
 			(*field)[i] = color::NONE;
 	}
-
 	// This code that to judge between "X" or not.
 	// "X" is top of the third row.
 	// "35" represent location of "X".
@@ -529,6 +528,7 @@ bool State::isExistNext_1p()
 	std::vector<cv::Vec3f> circles;
 	HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 1, 40, 10, 30, /*minRadius*/20);
 
+#if false	
 	// Display 
 	for( size_t i = 0; i < circles.size(); i++ )
 	{
@@ -540,6 +540,7 @@ bool State::isExistNext_1p()
 		cv::circle( gray, center, radius, cv::Scalar(0,0,255), 3);
 	}
 	debug::showForDebug(gray, 1);
+#endif
 
 	return (circles.size() == 0) ? false : true;
 }

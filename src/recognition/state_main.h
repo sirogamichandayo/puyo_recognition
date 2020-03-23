@@ -76,8 +76,8 @@ public:
 	{
 		initialize();
 		_puyo_color_list.reserve(color::PUYO_COLOR_NUM);
-		_redPuyo    = cv::imread("../data/puyoImg/red.jpg");
-		_yellowPuyo = cv::imread("../data/puyoImg/yellow.jpg");
+		_redPuyo    = cv::imread("../data/puyoImg/red.png");
+		_yellowPuyo = cv::imread("../data/puyoImg/yellow.png");
 
 		// The first 10 Screenshots are slow. (why)
 		for (int i = 0; i < 10; ++i)

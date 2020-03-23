@@ -102,11 +102,9 @@ namespace pic
 			 BOARD_1P_RECT, BOARD_2P_RECT,
 			 NEXT1_1P_RECT, NEXT2_1P_RECT,
 			 NEXT1_2P_RECT, NEXT2_2P_RECT,
-			 IS_NEXT_1P_RECT, IS_NEXT_2P_RECT
+			 IS_NEXT_1P_RECT, IS_NEXT_2P_RECT,
 			};
 	}
-	
-
 }; // namespace pic
 
 
