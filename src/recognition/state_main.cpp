@@ -77,11 +77,11 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 
 		// getPuyoColorSet(XXX, XXX, XXX, XXX, debug direcotory name);
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-						(*_pic_rect_list)[pic::BOARD_1P_RECT_I] /*,"board_1p"*/);
+						(*_pic_rect_list)[pic::BOARD_1P_RECT_I] ,"board_1p");
 		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
-						(*_pic_rect_list)[pic::NEXT1_1P_RECT_I]/*, "next1_1p"*/);
+						(*_pic_rect_list)[pic::NEXT1_1P_RECT_I], "next1_1p");
 		getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
-						(*_pic_rect_list)[pic::NEXT2_1P_RECT_I]/*, "next2_1p"*/);
+						(*_pic_rect_list)[pic::NEXT2_1P_RECT_I], "next2_1p");
 
 		auto begin = field->begin();
 		std::move(board.begin(), board.end(), begin);
@@ -401,7 +401,7 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 	}
 
 	for (size_t i = 0; i < size; ++i)
-		(*field)[i] = getColorNumber(img_split_vec[i]);
+		(*field)[i] = getPuyoBitNumPerPiece(img_split_vec[i]);
 
 	if (size == game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314)
 		complementPuyoColorSet(field, img_split_vec, size);
@@ -488,9 +488,9 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 	}
 
 
-int State::getColorNumber(const cv::Mat &img)
+int State::getPuyoBitNumPerPiece(const cv::Mat &img)
 {
-	int color = toGetPuyoColorPerPiece(img);
+	int color = getPuyoColorNumPerPiece(img);
 
 	// throw
 	if (color == color::NONE || color == color::DIST)
@@ -515,40 +515,34 @@ int State::getColorNumber(const cv::Mat &img)
 	return colorNum2BitNum(color);
 }
 
+// 1p's next background color is blue.
 bool State::isExistNext_1p()
 {
-	cv::Mat is_next_img(_img, (*_pic_rect_list)[pic::IS_NEXT_1P_RECT_I]);
-	cv::Mat hsv_channels[3];
-	cv::split(is_next_img, hsv_channels);
-	cv::Mat gray = hsv_channels[2];
-	/*
-	cv::Canny(hsv_channels[2], hsv_channels[2], 100, 200);
-	cv::bitwise_not(hsv_channels[2], hsv_channels[2]);
-	*/
-	std::vector<cv::Vec3f> circles;
-	HoughCircles(gray, circles, cv::HOUGH_GRADIENT, 1, 40, 10, 30, /*minRadius*/20);
+	cv::Mat next_1p(_img, (*_pic_rect_list)[pic::IS_NEXT_1P_RECT_I]);
+	int color = getPuyoColorNumPerPiece(next_1p, true);
 
-#if false	
-	// Display 
-	for( size_t i = 0; i < circles.size(); i++ )
-	{
-		cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-		int radius = cvRound(circles[i][2]);
-		// circle center
-		cv::circle( gray, center, 3, cv::Scalar(0,255,0), -1, 8, 0 );
-		// circle outline
-		cv::circle( gray, center, radius, cv::Scalar(0,0,255), 3);
-	}
-	debug::showForDebug(gray, 1);
-#endif
+	if (color == color::GREEN || color == color::RED || color == color::PURPLE || color == color::YELLOW)
+		return true;
 
-	return (circles.size() == 0) ? false : true;
+	if (color == color::BLUE)
+		return isExistPuyo(next_1p);
+
+	return false;
 }
+
 
 bool State::isExistNext_2p()
 {
-	cv::Mat is_next_img_2p(_img, (*_pic_rect_list)[pic::IS_NEXT_2P_RECT_I]);
-	return true;
+	cv::Mat next_2p(_img, (*_pic_rect_list)[pic::IS_NEXT_2P_RECT_I]);
+	int color = getPuyoColorNumPerPiece(next_2p, true);
+
+	if (color == color::GREEN || color == color::BLUE || color == color::PURPLE || color == color::YELLOW)
+		return true;
+
+	if (color == color::RED)
+		return isExistPuyo(next_2p);
+
+	return false;
 }
 
 // Judge between fight or not.
@@ -678,12 +672,12 @@ void State::getResult(int *const result)
 }
 
 
-int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
+int State::getPuyoColorNumPerPiece(const cv::Mat &image, bool is_next)
 {
 	// for yellow puyo.
 	cv::Mat image_padding;
 	// for exist next
-	if (is_exist_next)
+	if (is_next)
 		img_p::imgAroundCutRate(image, &image_padding, 0.1, 0.35, 0.8, 0.65);
 	else
 		img_p::imgAroundCutRate(image, &image_padding, 0.1, 0.1, 0.8, 0.8);
@@ -716,9 +710,8 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 			++color_pixel_dict[hsv.toGetPixelPuyoColor()];
 		}
 	}
-	if (is_exist_next)
+	if (is_next)
 	{
-		color_pixel_dict[color::NONE]*=3.0;
 		color_pixel_dict[color::PURPLE]*=2.0;
 	}
 	
@@ -737,7 +730,7 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 		color_picel_dict_for_debug.insert(std::pair<std::string, int>
 													(color_str, count));
 	}
-	debug::saveElem(color_picel_dict_for_debug.begin(), color_picel_dict_for_debug.end(), "color_elem");
+	debug::saveElem(color_picel_dict_for_debug.begin(), color_picel_dict_for_debug.end(), "color_elem", false);
 	///////////////////////////////////////////
 #endif
 
@@ -748,6 +741,39 @@ int State::toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next)
 		}
 	);
 	return max_color.first;
+}
+
+bool State::isExistPuyo(const cv::Mat &img)
+{
+	cv::Mat hsv_channels[3];
+	cv::split(img, hsv_channels);
+	cv::Mat gray;
+
+	// cv::Canny(hsv_channels[2], hsv_channels[2], 100, 200);
+	// cv::bitwise_not(hsv_channels[2], hsv_channels[2]);
+	cv::threshold(gray, gray, 0, 255, cv::THRESH_TOZERO_INV);
+	img_p::sharpningKernel9(hsv_channels[2], &gray);
+	std::vector<cv::Vec3f> circles;
+	HoughCircles(gray, circles, cv::HOUGH_GRADIENT,
+				 /*dp*/1,
+				 /*minDist*/40,
+				 /*param1*/10,
+				 /*param2*/30,
+				 /*minRadius*/17);
+#if true
+	// Display 
+	for( size_t i = 0; i < circles.size(); i++ )
+	{
+		cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+		int radius = cvRound(circles[i][2]);
+		// circle center
+		cv::circle( gray, center, 3, cv::Scalar(0,255,0), -1, 8, 0 );
+		// circle outline
+		cv::circle( gray, center, radius, cv::Scalar(0,0,255), 3);
+	}
+	debug::showForDebug(gray, 1);
+#endif
+	return (circles.size() == 0) ? false : true;
 }
 
 bool State::isJudgeClear()

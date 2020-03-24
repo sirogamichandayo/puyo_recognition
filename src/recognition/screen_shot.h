@@ -88,12 +88,12 @@ namespace pic
 		const cv::Rect CLEAR_RECT  = FINISH_RECT;
 		const cv::Rect BOARD_1P_RECT = cv::Rect(0, 0, 384, 720);
 		const cv::Rect BOARD_2P_RECT = cv::Rect(976, 0, 384, 720);
-		const cv::Rect NEXT1_1P_RECT = cv::Rect(440, 0, pic::gst::PUYO_WIDTH, pic::gst::PUYO_HEIGHT * 2);
+		const cv::Rect NEXT1_1P_RECT = cv::Rect(440, 4, pic::gst::PUYO_WIDTH, pic::gst::PUYO_HEIGHT * 2);
 		const cv::Rect NEXT2_1P_RECT = cv::Rect(492, 134, pic::gst::SMALL_PUYO_WIDTH, pic::gst::SMALL_PUYO_HEIGHT * 2);
-		const cv::Rect NEXT1_2P_RECT = cv::Rect(855, 0, pic::gst::PUYO_WIDTH, pic::gst::PUYO_HEIGHT * 2);
+		const cv::Rect NEXT1_2P_RECT = cv::Rect(855, 4, pic::gst::PUYO_WIDTH, pic::gst::PUYO_HEIGHT * 2);
 		const cv::Rect NEXT2_2P_RECT = cv::Rect(815, 134, pic::gst::SMALL_PUYO_WIDTH, pic::gst::SMALL_PUYO_HEIGHT * 2);
-		const cv::Rect IS_NEXT_1P_RECT = cv::Rect(440, 0, pic::gst::PUYO_WIDTH, pic::gst::PUYO_HEIGHT);
-		const cv::Rect IS_NEXT_2P_RECT = cv::Rect(855, 0, pic::gst::PUYO_WIDTH, pic::gst::PUYO_HEIGHT);
+		const cv::Rect IS_NEXT_1P_RECT = cv::Rect(440, 4, pic::gst::PUYO_WIDTH, pic::gst::PUYO_HEIGHT);
+		const cv::Rect IS_NEXT_2P_RECT = cv::Rect(855, 4, pic::gst::PUYO_WIDTH, pic::gst::PUYO_HEIGHT);
 
 		const std::vector<cv::Rect> PIC_RECT_LIST
 			{RESULT_1P_RECT, RESULT_2P_RECT,

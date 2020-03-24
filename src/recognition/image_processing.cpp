@@ -10,8 +10,8 @@ void img_p::imgAroundCutRate(const cv::Mat &img_input, cv::Mat *const img_output
 							 const float &w_rate, const float &h_rate)
 
 {
-	assert(x_rate + w_rate < 1.0);
-	assert(y_rate + h_rate < 1.0);
+	assert(x_rate + w_rate <= 1.0);
+	assert(y_rate + h_rate <= 1.0);
 	
 
 	int cols = img_input.cols;
@@ -102,3 +102,12 @@ void img_p::toHDImg(const cv::Mat &img_, cv::Mat *const img_output)
 			   (static_cast<double>(pic::HD_HEIGHT) / img_.rows));
 }
 					
+void img_p::sharpningKernel4(const cv::Mat &img_input, cv::Mat *const img_output)
+{
+	cv::filter2D(img_input, *img_output, img_input.depth(), img_p::sparpning_kernel_4_filter);
+}
+
+void img_p::sharpningKernel9(const cv::Mat &img_input, cv::Mat *const img_output)
+{
+	cv::filter2D(img_input, *img_output, img_input.depth(), img_p::sparpning_kernel_8_filter);
+}

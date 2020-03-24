@@ -158,9 +158,11 @@ protected:
 	void colorNum2ColorString(const int& color_num, std::string *const str);
 	void bitNum2ColorString(const int& color_num, std::string *const str);
 	
-	int getColorNumber(const cv::Mat &img);
 	void getPuyoColorSet(std::vector<int> *field, const int& col_num, const int& row_num, 
 									const cv::Rect &target_rect, const std::string &dir_path = "");
+	int getPuyoBitNumPerPiece(const cv::Mat &img);
+	int getPuyoColorNumPerPiece(const cv::Mat &image, bool is_next=false);
+	bool isExistPuyo(const cv::Mat &img); // Use hough transform
 	void complementPuyoColorSet(std::vector<int> *const field, const std::vector<cv::Mat> &img_split_vec, const int &size);
 	/*
 	void getMyOjamaCount_1p(std::vector<int> &field);
@@ -174,8 +176,6 @@ protected:
 	bool isJudgeClear(); // Judge clear or not(TA).
 	// Judge get result of fight.
 	void getResult(int *const result);		
-	int toGetPuyoColorPerPiece(const cv::Mat &image, bool is_exist_next=false);
-
 };
 
 #endif // STATE_MAIN_
