@@ -747,19 +747,18 @@ bool State::isExistPuyo(const cv::Mat &img)
 {
 	cv::Mat hsv_channels[3];
 	cv::split(img, hsv_channels);
-	cv::Mat gray;
+	cv::Mat gray = hsv_channels[2];
 
 	// cv::Canny(hsv_channels[2], hsv_channels[2], 100, 200);
 	// cv::bitwise_not(hsv_channels[2], hsv_channels[2]);
-	cv::threshold(gray, gray, 0, 255, cv::THRESH_TOZERO_INV);
-	img_p::sharpningKernel9(hsv_channels[2], &gray);
+	img_p::sharpningKernel9(gray, &gray);
 	std::vector<cv::Vec3f> circles;
 	HoughCircles(gray, circles, cv::HOUGH_GRADIENT,
 				 /*dp*/1,
 				 /*minDist*/40,
 				 /*param1*/10,
 				 /*param2*/30,
-				 /*minRadius*/17);
+				 /*minRadius*/20);
 #if true
 	// Display 
 	for( size_t i = 0; i < circles.size(); i++ )
