@@ -77,11 +77,11 @@ void State::getState(const int &mode, std::vector<int> *const field, bool isColo
 
 		// getPuyoColorSet(XXX, XXX, XXX, XXX, debug direcotory name);
 		getPuyoColorSet(&board, game::BOARD_COLS, game::BOARD_ROWS_NO_IN_1314,
-						(*_pic_rect_list)[pic::BOARD_1P_RECT_I] ,"board_1p");
+						(*_pic_rect_list)[pic::BOARD_1P_RECT_I],"board_1p");
 		getPuyoColorSet(&next1, game::NEXT1_COLS, game::NEXT1_ROWS,
-						(*_pic_rect_list)[pic::NEXT1_1P_RECT_I], "next1_1p");
+						(*_pic_rect_list)[pic::NEXT1_1P_RECT_I]/*, "next1_1p"*/);
 		getPuyoColorSet(&next2, game::NEXT2_COLS, game::NEXT2_ROWS,
-						(*_pic_rect_list)[pic::NEXT2_1P_RECT_I], "next2_1p");
+						(*_pic_rect_list)[pic::NEXT2_1P_RECT_I]/*, "next2_1p"*/);
 
 		auto begin = field->begin();
 		std::move(board.begin(), board.end(), begin);
@@ -384,8 +384,11 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 	std::vector<cv::Mat> img_split_vec(size);
 
 	img_p::splitImage(img_, cols, rows, &img_split_vec);
+	
+#ifdef IS_DEBUG_GET_PUYO_COLOR_SET
 	if (dir_path != "")
 	{
+		cout << "path" << endl;
 		//////////////////////////////
 		// DEBUG
 		
@@ -393,18 +396,21 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 		std::map<std::string, cv::Mat> img_split_vec_for_debug;
 		for (size_t i = 0; i < size; ++i)
 		{
-			std::string file_path_split = "puyo" + std::to_string(i); // for debug
+			std::string file_path_split = "puyo" + std::to_string(i+1); // for debug
 			img_split_vec_for_debug.insert(std::pair<std::string, cv::Mat>(file_path_split, img_split_vec[i]));
 		}
-		debug::saveImg(img_split_vec_for_debug.begin(), img_split_vec_for_debug.end(), dir_path, true);
+		debug::saveImg(img_split_vec_for_debug.begin(), img_split_vec_for_debug.end(), dir_path, /*is_hsv*/true, /*is_overwrite*/true);
 		/////////////////////////////////
 	}
+#endif
 
 	for (size_t i = 0; i < size; ++i)
 		(*field)[i] = getPuyoBitNumPerPiece(img_split_vec[i]);
 
 	if (size == game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314)
+	{
 		complementPuyoColorSet(field, img_split_vec, size);
+	}
 }
 
 
@@ -424,8 +430,8 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 	// This code that to judge between "X" or not.
 	// "X" is top of the third row.
 	// "35" represent location of "X".
-	const int x_place = 35;
-	const int red_bit_num = colorNum2BitNum(color::RED);
+	static const int x_place = 35;
+	static const int red_bit_num = colorNum2BitNum(color::RED);
 	if ((*field)[x_place] == red_bit_num)
 	{
 		if (!_isExistRedInColorList)
@@ -434,24 +440,27 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 		}
 		else
 		{
-			cv::Mat element(3, 3, CV_8U, cv::Scalar::all(255));
-			cv::Mat diff_X_FD;
-			cv::absdiff(img_split_vec[x_place], _redPuyo, diff_X_FD);
+			cv::Mat diff_img;
+			cv::absdiff(img_split_vec[x_place], _redPuyo, diff_img);
 			cv::Mat hsv_channels[3];
-			cv::split(diff_X_FD, hsv_channels);
+			cv::split(diff_img, hsv_channels);
+			cv::resize(hsv_channels[2], hsv_channels[2], cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
 			cv::threshold(hsv_channels[2], hsv_channels[2], 100, 255, cv::THRESH_BINARY);
 			img_p::imgAroundCutRate(hsv_channels[2], &hsv_channels[2], 0.05, 0.05, 0.9, 0.9);
-			// opening.
-			cv::morphologyEx(hsv_channels[2], hsv_channels[2], cv::MORPH_CLOSE, element, cv::Point(-1, -1), 3);
-			cv::resize(hsv_channels[2], hsv_channels[2], cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
+			img_p::closing(hsv_channels[2], &hsv_channels[2], img_p::kernel_3, /*iteration*/3);
 			if (50 < cv::countNonZero(hsv_channels[2]))
 				(*field)[x_place] = color::NONE;
 		}
 	}
 		
 	// for all delete or not, and chain effect or not.
-	const int yellow_bit_num = colorNum2BitNum(color::YELLOW);
-	for (size_t i = 0; i < field->size(); ++i)
+	static const int yellow_bit_num = colorNum2BitNum(color::YELLOW);
+#ifdef IS_DEBUG_YELLOW
+	std::map<std::string, cv::Mat> yellow_img_list, diff_img_list, diff_binary_img_list,
+		diff_binary_cut_around_img_list;
+#endif
+	int field_size = static_cast<int>(field->size());
+	for (int i = 0; i < field_size; ++i)
 	{
 		
 		if ((*field)[i] == yellow_bit_num)
@@ -460,24 +469,67 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 				(*field)[i] = color::NONE;
 			else
 			{
-				cv::Mat element(3, 3, CV_8U, cv::Scalar::all(255));
-				cv::Mat diff;
-				cv::absdiff(img_split_vec[i], _yellowPuyo, diff);
+				cv::Mat diff_img;
+				cv::absdiff(img_split_vec[i], _yellowPuyo, diff_img);
 				cv::Mat hsv_channels[3];
-				cv::split(diff, hsv_channels);
+				cv::split(diff_img, hsv_channels);
+
+				////////////////////				
+#ifdef IS_DEBUG_YELLOW
+				cv::Mat diff_gray = hsv_channels[2].clone();
+				std::string debug_diff_img_file_path = "diff" + std::to_string(i+1);
+				diff_img_list.insert(std::pair<std::string, cv::Mat>(debug_diff_img_file_path, diff_gray));
+
+				cv::Mat debug_yellow = img_split_vec[i].clone();
+				std::string debug_yellow_img_file_path = "yellow" + std::to_string(i+1);
+				yellow_img_list.insert(std::pair<std::string, cv::Mat>(debug_yellow_img_file_path, debug_yellow));
+#endif
+				////////////////////
+
+				img_p::imgAroundCutRate(hsv_channels[2], &hsv_channels[2], 0.05, 0.20, 0.9, 0.75);
+				// binary
 				cv::threshold(hsv_channels[2], hsv_channels[2], 100, 255, cv::THRESH_BINARY);
-				img_p::imgAroundCutRate(hsv_channels[2], &hsv_channels[2], 0.05, 0.05, 0.9, 0.9);
-				// opening.
-				cv::morphologyEx(hsv_channels[2], hsv_channels[2], cv::MORPH_CLOSE, element, cv::Point(-1, -1), 3);
+				
+				////////////////////
+#ifdef IS_DEBUG_YELLOW
+				cv::Mat debug_diff_binary_img = hsv_channels[2].clone();
+				std::string debug_diff_binary_img_file_path = "diff_binary" + std::to_string(i+1);
+				diff_binary_img_list.insert(std::pair<std::string, cv::Mat>(debug_diff_binary_img_file_path, debug_diff_binary_img));
+#endif
+				////////////////////
+				
+				img_p::opening(hsv_channels[2], &hsv_channels[2], img_p::kernel_3, /*iteration*/1);
+				//				img_p::closing(hsv_channels[2], &hsv_channels[2], img_p::kernel_3, /*iteration*/2);
+				cv::dilate(hsv_channels[2], hsv_channels[2], img_p::kernel_3, cv::Point(-1, -1), 1);
+
+				////////////////////
+#ifdef IS_DEBUG_YELLOW
+				cv::Mat debug_diff_binary_cut_img = hsv_channels[2].clone();
+				std::string debug_diff_binary_cut_img_file_path = "diff_binary_cut" + std::to_string(i+1);
+				diff_binary_cut_around_img_list.insert(std::pair<std::string, cv::Mat>
+													   (debug_diff_binary_cut_img_file_path,
+														debug_diff_binary_cut_img));
+#endif
+				////////////////////
+				
 				cv::resize(hsv_channels[2], hsv_channels[2], cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
-				if (50 < cv::countNonZero(hsv_channels[2]))
+				if (100 < cv::countNonZero(hsv_channels[2]))
 					(*field)[i] = color::NONE;
+#ifdef IS_DEBUG_YELLOW
+				std::cout << "count non zero ("<< i+1<< ")  : " << cv::countNonZero(hsv_channels[2]) << std::endl;
+#endif
 			}
 		}
 	}
-
+#ifdef IS_DEBUG_YELLOW
+		debug::saveImg(diff_img_list.begin(), diff_img_list.end(), "diff_yellow", false, true);
+		debug::saveImg(yellow_img_list.begin(), yellow_img_list.end(), "yellow", true, true);
+		debug::saveImg(diff_binary_img_list.begin(), diff_binary_img_list.end(), "diff_yellow_binary", false, true);
+		debug::saveImg(diff_binary_cut_around_img_list.begin(), diff_binary_cut_around_img_list.end(),
+					   "diff_yellow_binary_cut", false, true);
+#endif
 	// Delete floating puyo.(again)
-	for (size_t i = 1; i < game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314; ++i)
+	for (int i = 1; i < game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314; ++i)
 	{
 		if (i % game::BOARD_ROWS_NO_IN_1314 == 0) continue;
 			
@@ -683,7 +735,7 @@ int State::getPuyoColorNumPerPiece(const cv::Mat &image, bool is_next)
 		img_p::imgAroundCutRate(image, &image_padding, 0.1, 0.1, 0.8, 0.8);
 	
 	// Receive image(piece puyo), and judge puyo color
-	float size = 1.0;
+	float size = 0.2;
 	HSV hsv;
 
 	std::map<int, int>
@@ -749,17 +801,19 @@ bool State::isExistPuyo(const cv::Mat &img)
 	cv::split(img, hsv_channels);
 	cv::Mat gray = hsv_channels[2];
 
-	// cv::Canny(hsv_channels[2], hsv_channels[2], 100, 200);
-	// cv::bitwise_not(hsv_channels[2], hsv_channels[2]);
-	img_p::sharpningKernel9(gray, &gray);
+	cv::bitwise_not(gray, gray);
+	// img_p::sharpningKernel9(gray, &gray);
+	// img_p::opening(gray, &gray, img_p::kernel_3, 2);
+	cv::threshold(gray, gray, 40, 255, cv::THRESH_TOZERO);
+	cv::bitwise_not(gray, gray);
 	std::vector<cv::Vec3f> circles;
 	HoughCircles(gray, circles, cv::HOUGH_GRADIENT,
 				 /*dp*/1,
 				 /*minDist*/40,
 				 /*param1*/10,
-				 /*param2*/30,
+				 /*param2*/20,
 				 /*minRadius*/20);
-#if true
+#if false
 	// Display 
 	for( size_t i = 0; i < circles.size(); i++ )
 	{

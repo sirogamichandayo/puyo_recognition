@@ -1,6 +1,6 @@
 #include "./debug.h"
 
-std::string DEBUG_DIR_PATH;
+std::string debug::DEBUG_DIR_PATH;
 
 // existExstension("XXXX", ".AAA") : return false.
 // existExstension("XXXX.AAA", ".AAA") : return true.
@@ -23,50 +23,58 @@ bool debug::existExstension(const std::string& original, const std::string& exte
 void debug::initializeDir(const std::string& path, bool is_delete)
 {
 	if (!existExstension(path, "/"))
-		DEBUG_DIR_PATH += path + "/";
+		debug::DEBUG_DIR_PATH = path + "/";
 	else
-		DEBUG_DIR_PATH += path;
-	if (fs::exists(DEBUG_DIR_PATH) && is_delete)
+		debug::DEBUG_DIR_PATH = path;
+	
+	if (fs::exists(DEBUG_DIR_PATH))
 	{
-		std::string ans;
-		bool ans_bool;
-		while (true)
+		if (is_delete)
 		{
-			std::cout << "Delete directory? (yes/[no])" << std::endl;
-			std::cout << "dir name : " << DEBUG_DIR_PATH << std::endl;
-			std::cout << ">> ";
-			std::cin >> ans;
-			if (ans == "yes" || ans == "y")
-			{
-				ans_bool = true;
-				break;
-			}
-			else if (ans == "no" || ans == "n")
-			{
-				ans_bool = false;
-				break;
-			}
-			std::cout << "AGEIN\n" << std::endl;
-		}
-
-		if (ans_bool)
-		{
-			fs::remove_all(DEBUG_DIR_PATH);
+			debug::removeDir(debug::DEBUG_DIR_PATH);
+			assert(makeDir(debug::DEBUG_DIR_PATH));
 		}
 	}
-
-	if (debug::makeDir(DEBUG_DIR_PATH) == -1)
-		LOG("To make dir (name: \"" + DEBUG_DIR_PATH + "\") failed.");
+	else
+		assert(makeDir(debug::DEBUG_DIR_PATH));
 }
 
 void debug::initializeFile(std::ofstream& write_file,
-												   const std::string& path, 
-													 bool overwrite)
+						   const std::string& path, 
+						   bool overwrite)
 {
 	if (overwrite)
 		write_file.open(path, std::ios::trunc);
 	else
 		write_file.open(path, std::ios_base::app);
+}
+
+void debug::removeDir(const std::string& dir_name)
+{
+	std::string ans;
+	bool ans_bool;
+	while (true)
+	{
+		std::cout << "Delete directory? (yes/[no])" << std::endl;
+		std::cout << "dir name : " << dir_name << std::endl;
+		std::cout << ">> ";
+		std::cin >> ans;
+		if (ans == "yes" || ans == "y")
+		{
+			ans_bool = true;
+			break;
+		}
+		else if (ans == "no" || ans == "n")
+		{
+			ans_bool = false;
+			break;
+		}
+	}
+
+	if (ans_bool)
+	{
+		fs::remove_all(dir_name);
+	}
 }
 
 bool debug::makeDir(const std::string& dir_name)

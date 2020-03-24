@@ -111,3 +111,13 @@ void img_p::sharpningKernel9(const cv::Mat &img_input, cv::Mat *const img_output
 {
 	cv::filter2D(img_input, *img_output, img_input.depth(), img_p::sparpning_kernel_8_filter);
 }
+
+void img_p::opening(const cv::Mat &img_input, cv::Mat *const img_output, const cv::Mat &kernel, int iterations)
+{
+	cv::morphologyEx(img_input, *img_output, cv::MORPH_OPEN, kernel, cv::Point(-1, -1), iterations);
+}
+
+void img_p::closing(const cv::Mat &img_input, cv::Mat *const img_output, const cv::Mat &kernel, int iterations)
+{
+	cv::morphologyEx(img_input, *img_output, cv::MORPH_CLOSE, kernel, cv::Point(-1, -1), iterations);
+}

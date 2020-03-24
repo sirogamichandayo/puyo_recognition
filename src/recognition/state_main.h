@@ -79,6 +79,9 @@ public:
 		_redPuyo    = cv::imread("../data/puyoImg/red.png");
 		_yellowPuyo = cv::imread("../data/puyoImg/yellow.png");
 
+		cv::cvtColor(_redPuyo, _redPuyo, CV_BGR2HSV);
+		cv::cvtColor(_yellowPuyo, _yellowPuyo, CV_BGR2HSV);
+
 		// The first 10 Screenshots are slow. (why)
 		for (int i = 0; i < 10; ++i)
 		{

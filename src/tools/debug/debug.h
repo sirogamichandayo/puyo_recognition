@@ -14,28 +14,37 @@
 #include <ostream>
 #include <filesystem>
 
-extern std::string DEBUG_DIR_PATH; // in debug.cpp
 using namespace std;
 namespace fs = std::filesystem;
 
 namespace debug
 {
-	extern void initializeDir(const std::string& path, bool overwrite=false);
+	extern std::string DEBUG_DIR_PATH; // in debug.cpp
+	extern void initializeDir(const std::string& path, bool is_delete=false);
 	extern void initializeFile(std::ofstream& write_file, const std::string& path, bool overwrite=false);
 
 	// For debug and log
 	extern bool existExstension(const std::string& original, const std::string& extension);
-	
+
+	extern void removeDir(const std::string& dir_name);
 	extern bool makeDir(const std::string& dir_name);
 	extern bool fileExists(const std::string& str);
 
 	// std::map<std::string, std::Mat>
 	// std::string : file name.
 	template<class saveIterator>
-	void saveImg(saveIterator begin_i, saveIterator end_i, const std::string &dir_path, bool is_hsv=false) 
+	void saveImg(saveIterator begin_i, saveIterator end_i, const std::string &dir_path, bool is_hsv=false, bool is_overwrite=true) 
 	{
-		if (makeDir(DEBUG_DIR_PATH + dir_path) == -1)
-			LOG("To make dir (name : \"" + dir_path + "\") failed.");
+		if (fs::exists(debug::DEBUG_DIR_PATH + dir_path))
+		{
+			if (is_overwrite)
+			{
+				removeDir(debug::DEBUG_DIR_PATH + dir_path);
+				assert(makeDir(DEBUG_DIR_PATH + dir_path));
+			}
+		}
+		else
+			assert(makeDir(DEBUG_DIR_PATH + dir_path));
 
 		cv::Mat img;
 		for (;begin_i != end_i; ++begin_i)
@@ -46,7 +55,7 @@ namespace debug
 			} 
 			else
 			{
-				img = begin_i->second;
+				img = begin_i->second.clone();
 			}
 			
 			// check extension.

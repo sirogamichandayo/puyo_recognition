@@ -37,7 +37,7 @@ namespace pic
 		const int SMALL_PUYO_WIDTH = 50;
 		const int SMALL_PUYO_HEIGHT = 46;
 
-		const int X = 1374;
+		const int X = 294 + 1080;
 		const int Y = 186;
 		const int WIDTH = 1330;
 		const int HEIGHT = 696;
@@ -75,7 +75,7 @@ namespace pic
 		const int SMALL_PUYO_WIDTH = 51;
 		const int SMALL_PUYO_HEIGHT = 47;
 
-		const int X = 1360;
+		const int X = 280 + 1080;
 		const int Y = 159;
 		const int WIDTH = 1360;
 		const int HEIGHT = 720;

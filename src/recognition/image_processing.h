@@ -14,6 +14,10 @@ namespace image_processing
 											   -1.0, -1.0, -1.0,
 											   -1.0,  9.0, -1.0,
 											   -1.0, -1.0, -1.0);
+
+	const cv::Mat kernel_3(3, 3, CV_8U, cv::Scalar::all(255));
+	const cv::Mat kernel_5(5, 5, CV_8U, cv::Scalar::all(255));
+	
 	extern void imgAroundCutRate(const cv::Mat &img_input, cv::Mat *const img_output, 
 								 const float &x_rate, const float &y_rate, 
 								 const float &w_rate, const float &h_rate);
@@ -27,6 +31,9 @@ namespace image_processing
 	extern void toHDImg(const cv::Mat &img_, cv::Mat *const img_output);
 	extern void sharpningKernel4(const cv::Mat &img_input, cv::Mat *const img_output);
 	extern void sharpningKernel9(const cv::Mat &img_input, cv::Mat *const img_output);
+
+	extern void opening(const cv::Mat &img_input, cv::Mat *const img_output, const cv::Mat &kernel, int iterations=1);
+	extern void closing(const cv::Mat &img_input, cv::Mat *const img_output, const cv::Mat &kernel, int iterations=1);
 }
 
 
