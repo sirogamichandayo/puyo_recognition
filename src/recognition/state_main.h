@@ -57,7 +57,6 @@ namespace get_mode
 	unsigned const int IS_FIGHT_END       = 8;
 	unsigned const int BATTLE_RESULT      = 9;
 	unsigned const int IS_CLEAR           = 10; 
-
 } // namespace get_mode
 
 namespace judge
@@ -71,13 +70,13 @@ namespace judge
 class State
 {
 public:
-	State(ScreenShot *const scr_, const std::vector<cv::Rect> *rect_vec)
+	State(ScreenShot *const scr_, const std::vector<cv::Rect> *const rect_vec)
 		: _scr(scr_), _pic_rect_list(rect_vec)
 	{
 		initialize();
 		_puyo_color_list.reserve(color::PUYO_COLOR_NUM);
-		_redPuyo    = cv::imread("../data/puyoImg/red.png");
-		_yellowPuyo = cv::imread("../data/puyoImg/yellow.png");
+		_redPuyo    = cv::imread("../data/puyoImg/gst/red.png");
+		_yellowPuyo = cv::imread("../data/puyoImg/gst/yellow.png");
 
 		cv::cvtColor(_redPuyo, _redPuyo, CV_BGR2HSV);
 		cv::cvtColor(_yellowPuyo, _yellowPuyo, CV_BGR2HSV);
@@ -154,7 +153,7 @@ protected:
 	cv::Mat _redPuyo;                      // for "X"
 	cv::Mat _yellowPuyo;                   // for all delete and chain effect
 	ScreenShot *_scr;
-	const std::vector<cv::Rect> *_pic_rect_list;
+	const std::vector<cv::Rect> *const _pic_rect_list;
 
 	int colorNum2BitNum(const int& color_num);
 	int bitNum2ColorNum(const int& bit_num);

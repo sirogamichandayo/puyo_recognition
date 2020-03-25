@@ -66,6 +66,9 @@ namespace pic
 			 NEXT1_2P_RECT, NEXT2_2P_RECT,
 			 IS_NEXT_1P_RECT, IS_NEXT_2P_RECT
 			};
+
+		const cv::Mat RED_PUYO_IMG = cv::imread("../data/puyoImg/gst/red.png");
+		const cv::Mat YELLOW_PUYO_IMG = cv::imread("../data/puyoImg/gst/yellow.png");
 	}
 
 	namespace full_hd
@@ -104,6 +107,9 @@ namespace pic
 			 NEXT1_2P_RECT, NEXT2_2P_RECT,
 			 IS_NEXT_1P_RECT, IS_NEXT_2P_RECT,
 			};
+
+		const cv::Mat RED_PUYO_IMG = cv::imread("../data/puyoImg/full_hd/red.png");
+		const cv::Mat YELLOW_PUYO_IMG = cv::imread("../data/puyoImg/full_hd/yellow.png");
 	}
 }; // namespace pic
 
