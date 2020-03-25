@@ -17,13 +17,12 @@ void img_p::imgAroundCutRate(const cv::Mat &img_input, cv::Mat *const img_output
 	int cols = img_input.cols;
 	int rows = img_input.rows;
 
-	int x = cols * x_rate;
-	int y = rows * y_rate;
-	int width = cols * w_rate;
-	int height = rows * h_rate;
-	cv::Rect rect = cv::Rect(x, y, width, height);
+	int x = static_cast<double>(cols * x_rate);
+	int y = static_cast<double>(rows * y_rate);
+	int width = static_cast<double>(cols * w_rate);
+	int height = static_cast<double>(rows * h_rate);
 
-	*img_output = img_input(rect);
+	*img_output = img_input(cv::Rect(x, y, width, height));
 }								
 
 void img_p::img2Hist(const cv::Mat &img_, cv::MatND *const hist_output)

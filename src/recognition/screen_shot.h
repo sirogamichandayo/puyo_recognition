@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <string>
+#include <map>
 
 namespace pic
 {
@@ -32,6 +33,8 @@ namespace pic
 	const int HD_HEIGHT = 1080;
 	namespace gst
 	{
+		const std::string DIR_PATH = "../data/gst/puyo_img/";
+		
 		const int PUYO_WIDTH = 63;
 		const int PUYO_HEIGHT = 58;
 		const int SMALL_PUYO_WIDTH = 50;
@@ -67,12 +70,14 @@ namespace pic
 			 IS_NEXT_1P_RECT, IS_NEXT_2P_RECT
 			};
 
-		const cv::Mat RED_PUYO_IMG = cv::imread("../data/puyoImg/gst/red.png");
-		const cv::Mat YELLOW_PUYO_IMG = cv::imread("../data/puyoImg/gst/yellow.png");
+		const cv::Mat RED_PUYO_IMG = cv::imread(pic::gst::DIR_PATH + "red.png");
+		const cv::Mat YELLOW_PUYO_IMG = cv::imread(pic::gst::DIR_PATH + "yellow2.png");
 	}
 
 	namespace full_hd
 	{
+		const std::string DIR_PATH = "../data/full_hd/puyo_img/";
+		
 		const int PUYO_WIDTH = 64;
 		const int PUYO_HEIGHT = 60;
 		const int SMALL_PUYO_WIDTH = 51;
@@ -91,12 +96,12 @@ namespace pic
 		const cv::Rect CLEAR_RECT  = FINISH_RECT;
 		const cv::Rect BOARD_1P_RECT = cv::Rect(0, 0, 384, 720);
 		const cv::Rect BOARD_2P_RECT = cv::Rect(976, 0, 384, 720);
-		const cv::Rect NEXT1_1P_RECT = cv::Rect(440, 4, pic::gst::PUYO_WIDTH, pic::gst::PUYO_HEIGHT * 2);
-		const cv::Rect NEXT2_1P_RECT = cv::Rect(492, 134, pic::gst::SMALL_PUYO_WIDTH, pic::gst::SMALL_PUYO_HEIGHT * 2);
-		const cv::Rect NEXT1_2P_RECT = cv::Rect(855, 4, pic::gst::PUYO_WIDTH, pic::gst::PUYO_HEIGHT * 2);
-		const cv::Rect NEXT2_2P_RECT = cv::Rect(815, 134, pic::gst::SMALL_PUYO_WIDTH, pic::gst::SMALL_PUYO_HEIGHT * 2);
-		const cv::Rect IS_NEXT_1P_RECT = cv::Rect(440, 4, pic::gst::PUYO_WIDTH, pic::gst::PUYO_HEIGHT);
-		const cv::Rect IS_NEXT_2P_RECT = cv::Rect(855, 4, pic::gst::PUYO_WIDTH, pic::gst::PUYO_HEIGHT);
+		const cv::Rect NEXT1_1P_RECT = cv::Rect(440, 4, pic::full_hd::PUYO_WIDTH, pic::full_hd::PUYO_HEIGHT * 2);
+		const cv::Rect NEXT2_1P_RECT = cv::Rect(492, 134, pic::full_hd::SMALL_PUYO_WIDTH, pic::full_hd::SMALL_PUYO_HEIGHT * 2);
+		const cv::Rect NEXT1_2P_RECT = cv::Rect(855, 4, pic::full_hd::PUYO_WIDTH, pic::full_hd::PUYO_HEIGHT * 2);
+		const cv::Rect NEXT2_2P_RECT = cv::Rect(815, 134, pic::full_hd::SMALL_PUYO_WIDTH, pic::full_hd::SMALL_PUYO_HEIGHT * 2);
+		const cv::Rect IS_NEXT_1P_RECT = cv::Rect(440, 4, pic::full_hd::PUYO_WIDTH, pic::full_hd::PUYO_HEIGHT);
+		const cv::Rect IS_NEXT_2P_RECT = cv::Rect(855, 4, pic::full_hd::PUYO_WIDTH, pic::full_hd::PUYO_HEIGHT);
 
 		const std::vector<cv::Rect> PIC_RECT_LIST
 			{RESULT_1P_RECT, RESULT_2P_RECT,
@@ -108,8 +113,9 @@ namespace pic
 			 IS_NEXT_1P_RECT, IS_NEXT_2P_RECT,
 			};
 
-		const cv::Mat RED_PUYO_IMG = cv::imread("../data/puyoImg/full_hd/red.png");
-		const cv::Mat YELLOW_PUYO_IMG = cv::imread("../data/puyoImg/full_hd/yellow.png");
+		const cv::Mat RED_PUYO_IMG = cv::imread(pic::full_hd::DIR_PATH + "red.png");
+		const cv::Mat YELLOW_PUYO_IMG = cv::imread(pic::full_hd::DIR_PATH + "yellow.png");
+
 	}
 }; // namespace pic
 

@@ -70,16 +70,15 @@ namespace judge
 class State
 {
 public:
-	State(ScreenShot *const scr_, const std::vector<cv::Rect> *const rect_vec)
+	State(ScreenShot *const scr_, const std::vector<cv::Rect> *const rect_vec,
+		  const cv::Mat &red_, const cv::Mat &yellow_)
 		: _scr(scr_), _pic_rect_list(rect_vec)
 	{
 		initialize();
 		_puyo_color_list.reserve(color::PUYO_COLOR_NUM);
-		_redPuyo    = cv::imread("../data/puyoImg/gst/red.png");
-		_yellowPuyo = cv::imread("../data/puyoImg/gst/yellow.png");
 
-		cv::cvtColor(_redPuyo, _redPuyo, CV_BGR2HSV);
-		cv::cvtColor(_yellowPuyo, _yellowPuyo, CV_BGR2HSV);
+		cv::cvtColor(red_, _redPuyo, CV_BGR2HSV);
+		cv::cvtColor(yellow_, _yellowPuyo, CV_BGR2HSV);
 
 		// The first 10 Screenshots are slow. (why)
 		for (int i = 0; i < 10; ++i)
@@ -150,11 +149,12 @@ protected:
 	bool _initColorList;
 	bool _isExistRedInColorList;           // for "X"
 	bool _isExistYellowInColorList;        // for all delete.
-	cv::Mat _redPuyo;                      // for "X"
-	cv::Mat _yellowPuyo;                   // for all delete and chain effect
+
 	ScreenShot *_scr;
 	const std::vector<cv::Rect> *const _pic_rect_list;
-
+	cv::Mat _redPuyo;                      // for "X"
+	cv::Mat _yellowPuyo;                   // for all delete and chain effect
+	
 	int colorNum2BitNum(const int& color_num);
 	int bitNum2ColorNum(const int& bit_num);
 	void colorNum2ColorString(const int& color_num, std::string *const str);

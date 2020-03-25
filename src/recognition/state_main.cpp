@@ -1,3 +1,4 @@
+#define DEBUG_PUYO_COLOR 1
 #define DEBUG_YELLOW 1
 
 #include "./state_main.h"
@@ -388,7 +389,6 @@ void State::getPuyoColorSet(std::vector<int> *const field,
 	img_p::splitImage(img_, cols, rows, &img_split_vec);
 	
 #if DEBUG_PUYO_COLOR
-	cout << "dir_path : " << dir_path << endl;
 	if (dir_path != "")
 	{
 		//////////////////////////////
@@ -458,8 +458,8 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 	// for all delete or not, and chain effect or not.
 	static const int yellow_bit_num = colorNum2BitNum(color::YELLOW);
 #ifdef DEBUG_YELLOW
-	std::map<std::string, cv::Mat> yellow_img_list, diff_img_list, diff_binary_img_list,
-		diff_binary_cut_around_img_list;
+	std::map<std::string, cv::Mat> yellow_img_list, diff_img_list, diff_color_img_list ,diff_binary_img_list,
+		diff_binary_cut_around_img_list, final_img_list;
 #endif
 	int field_size = static_cast<int>(field->size());
 	for (int i = 0; i < field_size; ++i)
@@ -478,6 +478,10 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 
 				////////////////////				
 #ifdef DEBUG_YELLOW
+				cv::Mat diff_color = diff_img.clone();
+				std::string debug_diff_color_path = "diff_color" + std::to_string(i+1);
+				diff_color_img_list.insert(std::pair<std::string, cv::Mat>(debug_diff_color_path, diff_color));
+				
 				cv::Mat diff_gray = hsv_channels[2].clone();
 				std::string debug_diff_img_file_path = "diff" + std::to_string(i+1);
 				diff_img_list.insert(std::pair<std::string, cv::Mat>(debug_diff_img_file_path, diff_gray));
@@ -488,9 +492,8 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 #endif
 				////////////////////
 
-				img_p::imgAroundCutRate(hsv_channels[2], &hsv_channels[2], 0.05, 0.20, 0.9, 0.75);
 				// binary
-				cv::threshold(hsv_channels[2], hsv_channels[2], 100, 255, cv::THRESH_BINARY);
+				cv::threshold(hsv_channels[2], hsv_channels[2], 80, 255, cv::THRESH_BINARY);
 				
 				////////////////////
 #ifdef DEBUG_YELLOW
@@ -500,8 +503,9 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 #endif
 				////////////////////
 				
-				img_p::opening(hsv_channels[2], &hsv_channels[2], img_p::kernel_3, /*iteration*/2);
-				//				cv::dilate(hsv_channels[2], hsv_channels[2], img_p::kernel_3, cv::Point(-1, -1), 1);
+				img_p::opening(hsv_channels[2], &hsv_channels[2], img_p::kernel_3, /*iteration*/1);
+				cv::dilate(hsv_channels[2], hsv_channels[2], img_p::kernel_3, cv::Point(-1, -1), 1);
+				img_p::imgAroundCutRate(hsv_channels[2], &hsv_channels[2], 0.05, 0.20, 0.9, 0.75);
 
 				////////////////////
 #ifdef DEBUG_YELLOW
@@ -513,22 +517,30 @@ void State::complementPuyoColorSet(std::vector<int> *const field,
 #endif
 				////////////////////
 				
-				//				cv::resize(hsv_channels[2], hsv_channels[2], cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
-				if (100 < cv::countNonZero(hsv_channels[2]))
+				cv::resize(hsv_channels[2], hsv_channels[2], cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
+				if (80 < cv::countNonZero(hsv_channels[2]))
 					(*field)[i] = color::NONE;
 #ifdef DEBUG_YELLOW
 				std::cout << "count non zero ("<< i+1<< ")  : " << cv::countNonZero(hsv_channels[2]) << std::endl;
 				debug::showForDebug(hsv_channels[2], 0);
+
+				cv::Mat debug_final_img = hsv_channels[2].clone();
+				std::string debug_final_img_path = "final" + std::to_string(i+1);
+				final_img_list.insert(std::pair<std::string, cv::Mat>
+									  (debug_final_img_path,
+									   debug_final_img));
 #endif
 			}
 		}
 	}
 #ifdef DEBUG_YELLOW
-		debug::saveImg(diff_img_list.begin(), diff_img_list.end(), "diff_yellow", false, true);
-		debug::saveImg(yellow_img_list.begin(), yellow_img_list.end(), "yellow", true, true);
-		debug::saveImg(diff_binary_img_list.begin(), diff_binary_img_list.end(), "diff_yellow_binary", false, true);
-		debug::saveImg(diff_binary_cut_around_img_list.begin(), diff_binary_cut_around_img_list.end(),
-					   "diff_yellow_binary_cut", false, true);
+	debug::saveImg(diff_color_img_list.begin(), diff_color_img_list.end(), "diff_color", true, true);
+	debug::saveImg(diff_img_list.begin(), diff_img_list.end(), "diff_yellow", false, true);
+	debug::saveImg(yellow_img_list.begin(), yellow_img_list.end(), "yellow", true, true);
+	debug::saveImg(diff_binary_img_list.begin(), diff_binary_img_list.end(), "diff_yellow_binary", false, true);
+	debug::saveImg(diff_binary_cut_around_img_list.begin(), diff_binary_cut_around_img_list.end(),
+				   "diff_yellow_binary_cut", false, true);
+	debug::saveImg(final_img_list.begin(), final_img_list.end(), "final", false, true);
 #endif
 	// Delete floating puyo.(again)
 	for (int i = 1; i < game::BOARD_COLS*game::BOARD_ROWS_NO_IN_1314; ++i)
