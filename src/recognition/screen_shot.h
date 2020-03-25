@@ -14,36 +14,36 @@
 
 namespace pic
 {
-	const int RESULT_1P_RECT_I = 0;
-	const int RESULT_2P_RECT_I = 1;
-	const int FIGHT_1P_RECT_I = 2;
-	const int FIGHT_2P_RECT_I = 3;
-	const int FINISH_RECT_I = 4;
-	const int CLEAR_RECT_I = 5;
-	const int BOARD_1P_RECT_I = 6;
-	const int BOARD_2P_RECT_I = 7;
-	const int NEXT1_1P_RECT_I = 8;
-	const int NEXT2_1P_RECT_I = 9;
-	const int NEXT1_2P_RECT_I = 10;
-	const int NEXT2_2P_RECT_I = 11;
-	const int IS_NEXT_1P_RECT_I = 12;
-	const int IS_NEXT_2P_RECT_I = 13;
+	constexpr int RESULT_1P_RECT_I = 0;
+	constexpr int RESULT_2P_RECT_I = 1;
+	constexpr int FIGHT_1P_RECT_I = 2;
+	constexpr int FIGHT_2P_RECT_I = 3;
+	constexpr int FINISH_RECT_I = 4;
+	constexpr int CLEAR_RECT_I = 5;
+	constexpr int BOARD_1P_RECT_I = 6;
+	constexpr int BOARD_2P_RECT_I = 7;
+	constexpr int NEXT1_1P_RECT_I = 8;
+	constexpr int NEXT2_1P_RECT_I = 9;
+	constexpr int NEXT1_2P_RECT_I = 10;
+	constexpr int NEXT2_2P_RECT_I = 11;
+	constexpr int IS_NEXT_1P_RECT_I = 12;
+	constexpr int IS_NEXT_2P_RECT_I = 13;
 	
-	const int HD_WIDTH = 1920;
-	const int HD_HEIGHT = 1080;
+	constexpr int HD_WIDTH = 1920;
+	constexpr int HD_HEIGHT = 1080;
 	namespace gst
 	{
 		const std::string DIR_PATH = "../data/gst/puyo_img/";
 		
-		const int PUYO_WIDTH = 63;
-		const int PUYO_HEIGHT = 58;
-		const int SMALL_PUYO_WIDTH = 50;
-		const int SMALL_PUYO_HEIGHT = 46;
+		constexpr int PUYO_WIDTH = 63;
+		constexpr int PUYO_HEIGHT = 58;
+		constexpr int SMALL_PUYO_WIDTH = 50;
+		constexpr int SMALL_PUYO_HEIGHT = 46;
 
-		const int X = 294 + 1080;
-		const int Y = 186;
-		const int WIDTH = 1330;
-		const int HEIGHT = 696;
+		constexpr int X = 294 + 1080;
+		constexpr int Y = 186;
+		constexpr int WIDTH = 1330;
+		constexpr int HEIGHT = 696;
 
 		const cv::Rect RESULT_1P_RECT = cv::Rect(280, 400, 350, 70); // Win, Lose, Draw
 		const cv::Rect RESULT_2P_RECT = cv::Rect(1256, 400, 350, 70);
@@ -78,15 +78,15 @@ namespace pic
 	{
 		const std::string DIR_PATH = "../data/full_hd/puyo_img/";
 		
-		const int PUYO_WIDTH = 64;
-		const int PUYO_HEIGHT = 60;
-		const int SMALL_PUYO_WIDTH = 51;
-		const int SMALL_PUYO_HEIGHT = 47;
+		constexpr int PUYO_WIDTH = 64;
+		constexpr int PUYO_HEIGHT = 60;
+		constexpr int SMALL_PUYO_WIDTH = 51;
+		constexpr int SMALL_PUYO_HEIGHT = 47;
 
-		const int X = 280 + 1080;
-		const int Y = 159;
-		const int WIDTH = 1360;
-		const int HEIGHT = 720;
+		constexpr int X = 280 + 1080;
+		constexpr int Y = 159;
+		constexpr int WIDTH = 1360;
+		constexpr int HEIGHT = 720;
 
 		const cv::Rect RESULT_1P_RECT = cv::Rect(280, 400, 350, 70); // Win, Lose, Draw
 		const cv::Rect RESULT_2P_RECT = cv::Rect(1256, 400, 350, 70);

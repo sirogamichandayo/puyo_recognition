@@ -30,14 +30,14 @@ namespace img_p = image_processing;
 
 namespace game
 {
-	unsigned const int BOARD_COLS = 6;
-	unsigned const int BOARD_ROWS_NO_IN_1314 = 12;
-	unsigned const int BOARD_ROWS_IN_1314 = 14;
-	unsigned const int NEXT1_COLS = 1;
-	unsigned const int NEXT1_ROWS = 2;
-	unsigned const int NEXT2_COLS = 1;
-	unsigned const int NEXT2_ROWS = 2;
-	unsigned const int ALL_PUYO_NUM =
+	unsigned constexpr int BOARD_COLS = 6;
+	unsigned constexpr int BOARD_ROWS_NO_IN_1314 = 12;
+	unsigned constexpr int BOARD_ROWS_IN_1314 = 14;
+	unsigned constexpr int NEXT1_COLS = 1;
+	unsigned constexpr int NEXT1_ROWS = 2;
+	unsigned constexpr int NEXT2_COLS = 1;
+	unsigned constexpr int NEXT2_ROWS = 2;
+	unsigned constexpr int ALL_PUYO_NUM =
 		game::BOARD_COLS * game::BOARD_ROWS_NO_IN_1314 +
 		game::NEXT1_COLS * game::NEXT1_ROWS +
 		game::NEXT2_COLS * game::NEXT2_ROWS;
@@ -46,25 +46,25 @@ namespace game
 
 namespace get_mode
 {
-	unsigned const int IS_EXIST_NEXT_1P   = 0;
-	unsigned const int IS_EXIST_NEXT_2P   = 1;
-	unsigned const int ALL_PUYO_1P        = 2;
-	unsigned const int ALL_PUYO_2P        = 3;
-	unsigned const int BOARD_PUYO_1P      = 4;
-	unsigned const int BOARD_PUYO_2P      = 5;
-	unsigned const int NEXT_PUYO_1P       = 6;
-	unsigned const int NEXT_PUYO_2P       = 7;
-	unsigned const int IS_FIGHT_END       = 8;
-	unsigned const int BATTLE_RESULT      = 9;
-	unsigned const int IS_CLEAR           = 10; 
+	unsigned constexpr int IS_EXIST_NEXT_1P   = 0;
+	unsigned constexpr int IS_EXIST_NEXT_2P   = 1;
+	unsigned constexpr int ALL_PUYO_1P        = 2;
+	unsigned constexpr int ALL_PUYO_2P        = 3;
+	unsigned constexpr int BOARD_PUYO_1P      = 4;
+	unsigned constexpr int BOARD_PUYO_2P      = 5;
+	unsigned constexpr int NEXT_PUYO_1P       = 6;
+	unsigned constexpr int NEXT_PUYO_2P       = 7;
+	unsigned constexpr int IS_FIGHT_END       = 8;
+	unsigned constexpr int BATTLE_RESULT      = 9;
+	unsigned constexpr int IS_CLEAR           = 10; 
 } // namespace get_mode
 
 namespace judge
 {
-	unsigned const int NONE = 0;	
-	unsigned const int WIN = 1;
-	unsigned const int LOSE = 2;
-	unsigned const int DROW = 3; 	
+	unsigned constexpr int NONE = 0;	
+	unsigned constexpr int WIN = 1;
+	unsigned constexpr int LOSE = 2;
+	unsigned constexpr int DROW = 3; 	
 }
 
 class State
